@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net6.0": {
+      "Pastel": {
+        "type": "Direct",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "Y1EEIxj52o0mO4J/AKwtSDdVoFSNFZcBDm1dtPrngMkgne5QgcC5hIs+9gd31jp5ASEZ2YZpgI88xADSDCNZ7w=="
+      },
+      "RestSharp": {
+        "type": "Direct",
+        "requested": "[106.13.0, )",
+        "resolved": "106.13.0",
+        "contentHash": "vwUdmmtC5vtePeNfBWnFcixBF2KjUeVv3ss4ZFzCIkOf7NB7W/9qX8JNZD9DOrz2yGk4AJW8k9znwgPZhnoiNg=="
+      },
+      "RestSharp.Serializers.NewtonsoftJson": {
+        "type": "Direct",
+        "requested": "[106.13.0, )",
+        "resolved": "106.13.0",
+        "contentHash": "/nPcSkeyRiK4+q/IGlVuv9P2FYChIRvrVpm4d1/iGsMFzTu4n2VyXPAm7IcnvLdR/oczrAQ28w74Ejkf0cbd/Q==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1",
+          "RestSharp": "106.13.0"
+        }
+      },
+      "System.CommandLine": {
+        "type": "Direct",
+        "requested": "[2.0.0-beta1.21568.1, 2.0.0-beta1.21568.1]",
+        "resolved": "2.0.0-beta1.21568.1",
+        "contentHash": "UGFOApX96URBGQk+cqcq7z7dvBAg2YZkwTryGxpDpHaExrpXdBBz8BCYZKkJp7ol2qDJRNg1oFTW5YI9gmYBlw==",
+        "dependencies": {
+          "system.memory": "4.5.4"
+        }
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.1",
+        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
+      },
+      "System.Memory": {
+        "type": "Transitive",
+        "resolved": "4.5.4",
+        "contentHash": "1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw=="
+      }
+    }
+  }
+}
