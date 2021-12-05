@@ -1,5 +1,7 @@
 # OdinPlus Mod Uploader
 
+[![Release](https://github.com/Digitalroot-Valheim/Digitalroot.OdinPlusModUploader/actions/workflows/release.yml/badge.svg)](https://github.com/Digitalroot-Valheim/Digitalroot.OdinPlusModUploader/actions/workflows/release.yml)
+
 ## Introduction
 
 This is a command-line tool that can be used to upload mod files to an existing mod on Thunderstore, ModVault and Nexus Mods.
