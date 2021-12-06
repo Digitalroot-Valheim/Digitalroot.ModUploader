@@ -17,6 +17,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageIcon>ValheimRcon_color.png</PackageIcon>
     <PackageIconUrl />
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>valheim, digitalroot, mods, cli, tool, nexusmods, thunderstore, modvault</PackageTags>
     <Authors>Digitalroot</Authors>
     <Company>Digitalroot Technologies</Company>
@@ -28,7 +29,7 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-    <VersionPrefix>1.0.3</VersionPrefix>
+    <VersionPrefix>1.0.6</VersionPrefix>
     <RestoreAdditionalProjectSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json;
       https://digitalroot-valheim-nuget.s3.us-west-2.amazonaws.com/index.json
@@ -46,10 +47,8 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\ico\ValheimRcon_color.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
+		<None Include="..\ico\ValheimRcon_color.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 
 	<ItemGroup>

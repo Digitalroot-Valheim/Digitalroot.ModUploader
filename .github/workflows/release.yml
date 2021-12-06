@@ -4,7 +4,7 @@ concurrency: ci-${{ github.ref }}
 
 on:
   push:
-    branches: [ main ] # Default release branch
+    branches: [ main, develop ] # Default release branch
     paths:
       - 'src/**'   
       - '.github/workflows/**' 
@@ -27,3 +27,4 @@ jobs:
       nuget-gh-upload: true
       nuget-s3-upload: true
       nuget-org-upload: true
+      is-nuget-package: true
