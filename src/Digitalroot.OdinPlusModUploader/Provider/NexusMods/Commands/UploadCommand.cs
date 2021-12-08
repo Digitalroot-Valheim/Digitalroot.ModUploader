@@ -10,14 +10,16 @@ using Digitalroot.OdinPlusModUploader.Provider.NexusMods.Validators;
 using Digitalroot.OdinPlusModUploader.Utils;
 using Pastel;
 using System;
-using System.Collections.Concurrent;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+
+// ReSharper disable InconsistentNaming
 
 #pragma warning disable CS1998
 
@@ -26,6 +28,8 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Commands;
 
 internal static class UploadCommand
 {
+  private static readonly AutoResetEvent _autoEvent = new(false);
+
   internal static ICommand GetUploadCommand()
   {
     var command = new Command("upload", $"Upload a file of {FileSizeFormatter.FormatSize(NexusModsRestClient.MaxFileSize).Pastel(ColorOptions.WarningColor)} or less to nexusmods.com")
@@ -50,8 +54,6 @@ internal static class UploadCommand
     command.AddValidator(ValidatorsFactory.Instance.GetValidator);
     return command;
   }
-
-  private static readonly ConcurrentBag<TaskInfo> TaskList = new();
 
   private static ICommandHandler GetCommandHandler()
   {
@@ -114,56 +116,123 @@ internal static class UploadCommand
         // Check file size and get chunkCount
         var totalChunks = GetChunkCount(archiveFile);
 
+        // Upload all chunks but the last one. 
+        var r = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
+        RunUploadWorkFlow(totalChunks); // Upload the last file chunk
+        _autoEvent.WaitOne();
+
+        #region Run Workflow
+
         async void RunUploadWorkFlow(int i)
         {
-          var workflow = GetUploadWorkflow(i
-                                           , totalChunks
-                                           , archiveFile
-                                           , cookie
-                                           , modId
-                                           , fileName
-                                           , version
-                                           , game
-                                           , disableDownloadWithManager
-                                           , disableVersionUpdate
-                                           , disableMainVortex
-                                           , category
-                                           , description
-                                           , gameInfoMessage
-                                           , disableRequirementsPopUp
-                                           , disableMainFileUpdate
-                                           , oldFileId
-                                           , !disableMainFileUpdate
-                                           , !disableMainFileUpdate);
+          try
+          {
+            var uploadFileChunk = await GetUploadWorkflow(i
+                                                          , totalChunks
+                                                          , archiveFile
+                                                          , cookie
+                                                          , modId
+                                                          , fileName
+                                                          , version
+                                                          , game
+                                                          , disableDownloadWithManager
+                                                          , disableVersionUpdate
+                                                          , disableMainVortex
+                                                          , category
+                                                          , description
+                                                          , gameInfoMessage
+                                                          , disableRequirementsPopUp
+                                                          , disableMainFileUpdate
+                                                          , oldFileId
+                                                          , !disableMainFileUpdate
+                                                          , !disableMainFileUpdate
+                                                         );
+            if (uploadFileChunk == null) return;
+            // if (uploadFileChunk.RequestModel.ResumableChunkNumber != totalChunks) return;
 
-          TaskList.Add(new TaskInfo(workflow, i, "task1"));
-          await workflow.WaitAsync(new TimeSpan(3, 0, 0));
+            // Report on the results
+            if (!uploadFileChunk.ResponseModel.Uuid.HasValue())
+            {
+              Console.WriteLine("File uploaded to Nexus Mods, but Id is null".Pastel(ColorOptions.ErrorColor));
+              Console.WriteLine();
+              Console.WriteLine("Response Details:".Pastel(ColorOptions.ErrorColor));
+              Console.WriteLine($"{nameof(uploadFileChunk.ResponseModel.UploadFileHash)}: {uploadFileChunk.ResponseModel.UploadFileHash}".Pastel(ColorOptions.ErrorColor));
+              Console.WriteLine($"{nameof(uploadFileChunk.ResponseModel.Status)}: {uploadFileChunk.ResponseModel.Status}".Pastel(ColorOptions.ErrorColor));
+              Console.WriteLine($"{nameof(uploadFileChunk.ResponseModel.Uuid)}: {uploadFileChunk.ResponseModel.Uuid}".Pastel(ColorOptions.ErrorColor));
+            }
+            else
+            {
+              Console.WriteLine($"File successfully uploaded to Nexus Mods with Id '{uploadFileChunk.ResponseModel.Uuid}'".Pastel(ColorOptions.SuccessColor));
+            }
+
+            // Check for file assemble
+            Message<
+              CheckFileStatusRequest,
+              CheckFileStatusRequestModel,
+              CheckFileStatusResponse,
+              CheckFileStatusResponseModel
+            > checkFileStatus = await CheckFileStatus(cookie, uploadFileChunk.ResponseModel);
+
+            // Attach file to Mod.
+            if (checkFileStatus.Response.IsSuccessful && checkFileStatus.ResponseModel.FileChunksReassembled)
+            {
+              Console.WriteLine($"File '{checkFileStatus.RequestModel.Uuid}' confirmed as assembled.".Pastel(ColorOptions.SuccessColor));
+
+              // ReSharper disable once UnusedVariable
+              Message<
+                AddFileToModRequest,
+                AddFileToModRequestModel,
+                AddFileToModResponse,
+                AddFileToModResponseModel
+              > addFileToMod = await AddFileToMod(cookie
+                                                  , modId
+                                                  , version
+                                                  , disableVersionUpdate
+                                                  , disableMainVortex
+                                                  , fileName
+                                                  , archiveFile
+                                                  , category
+                                                  , description
+                                                  , disableDownloadWithManager
+                                                  , disableRequirementsPopUp
+                                                  , gameInfoMessage.ResponseModel.Id
+                                                  , checkFileStatus.RequestModel.Uuid
+                                                  , checkFileStatus.RequestModel.FileHash
+                                                  , disableMainFileUpdate
+                                                  , oldFileId
+                                                  , !disableMainFileUpdate
+                                                  , !disableMainFileUpdate
+                                                 );
+
+              if (addFileToMod.Response.IsSuccessful)
+              {
+                Trace.WriteLine("Workflow complete.".Pastel(ColorOptions.StatusColor));
+                _autoEvent.Set();
+                return;
+              }
+
+              throw new Exception("Workflow Failed");
+            }
+          }
+          catch (Exception e)
+          {
+            Console.WriteLine(e.Message.Pastel(ColorOptions.ErrorColor));
+            Console.WriteLine(e.StackTrace.Pastel(ColorOptions.ErrorColor));
+            _autoEvent.Set();
+          }
         }
 
-        // Upload all chunks but the last one. 
-        Parallel.For(1
-                     , totalChunks
-                     , new ParallelOptions
-                     {
-                       MaxDegreeOfParallelism = 2
-                     }
-                     , RunUploadWorkFlow);
-
-        ProcessAllAsyncTasks();
-        RunUploadWorkFlow(totalChunks); // Upload the last file chunk
-        ProcessAllAsyncTasks();
-
-        Trace.WriteLine($"Tasks: {TaskList.Count}, Completed: {TaskList.Count(t => t.Task.IsCompletedSuccessfully)}, Cancelled:{TaskList.Count(t => t.Task.IsCanceled)}, Faulted: {TaskList.Count(t => t.Task.IsFaulted)}");
+        #endregion
       });
   }
 
   #region Workflow
 
-  private static Task<Message<
-    UploadChunkExistsRequest
-    , UploadChunkExistsRequestModel
-    , UploadChunkExistsResponse
-    , UploadChunkExistsChunkResponseModel
+  private static async Task<Message<
+    UploadFileChunkRequest,
+    UploadFileChunkRequestModel,
+    UploadFileChunkResponse,
+    UploadFileChunkResponseModel
   >> GetUploadWorkflow(int i,
                        int totalChunks,
                        FileInfo archiveFile,
@@ -185,169 +254,80 @@ internal static class UploadCommand
                        , bool removeOldVersion)
   {
     // Check if chunk already uploaded
-    Task<Message<
+    Message<
       UploadChunkExistsRequest,
       UploadChunkExistsRequestModel,
       UploadChunkExistsResponse,
       UploadChunkExistsChunkResponseModel
-    >> task1 = CheckUploadChunkExists(archiveFile
-                                      , cookie
-                                      , Convert.ToUInt32(i)
-                                      , i != totalChunks
-                                          ? Convert.ToUInt32(NexusModsRestClient.ChunkSize)
-                                          : Convert.ToUInt32(Convert.ToUInt64(archiveFile.Length) % NexusModsRestClient.ChunkSize)
-                                      , Convert.ToUInt32(totalChunks)
-                                     );
+    > checkUploadChunkExists = await CheckUploadChunkExists(archiveFile
+                                                            , cookie
+                                                            , Convert.ToUInt32(i)
+                                                            , i != totalChunks
+                                                                ? Convert.ToUInt32(NexusModsRestClient.ChunkSize)
+                                                                : Convert.ToUInt32(Convert.ToUInt64(archiveFile.Length) % NexusModsRestClient.ChunkSize)
+                                                            , Convert.ToUInt32(totalChunks)
+                                                           );
+
+    if (!checkUploadChunkExists.Response.IsSuccessful) return null;
 
     // Report Results
-    var task2 = task1.ContinueWith(antecedent_task1 =>
-                                   {
-                                     if (antecedent_task1.Status == TaskStatus.Canceled) return;
-                                     Console.WriteLine(task1.Result.Response.Exists
-                                                         ? $"Chunk {antecedent_task1.Result.RequestModel.ResumableChunkNumber} of {antecedent_task1.Result.RequestModel.ResumableTotalChunks} already exist".Pastel(ColorOptions.SuccessColor)
-                                                         : $"Chunk {antecedent_task1.Result.RequestModel.ResumableChunkNumber} of {antecedent_task1.Result.RequestModel.ResumableTotalChunks} does not already exist.".Pastel(ColorOptions.WarningColor));
-                                   }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.OnlyOnRanToCompletion);
+    Console.WriteLine(checkUploadChunkExists.Response.Exists
+                        ? $"Chunk {checkUploadChunkExists.RequestModel.ResumableChunkNumber} of {checkUploadChunkExists.RequestModel.ResumableTotalChunks} already exist".Pastel(ColorOptions.SuccessColor)
+                        : $"Chunk {checkUploadChunkExists.RequestModel.ResumableChunkNumber} of {checkUploadChunkExists.RequestModel.ResumableTotalChunks} does not already exist.".Pastel(ColorOptions.WarningColor));
 
     // Upload a chunk of the file
-    Task<Task<Message<
+    if (checkUploadChunkExists.ResponseModel?.Status ?? false)
+    {
+      if (i != totalChunks)
+      {
+        return null; // Chunk already uploaded
+      }
+
+      return new Message<UploadFileChunkRequest, UploadFileChunkRequestModel, UploadFileChunkResponse, UploadFileChunkResponseModel>
+      {
+        ResponseModel = checkUploadChunkExists.ResponseModel
+      };
+    }
+
+    // Open File
+    await using var str = new FileStream(archiveFile.FullName,
+                                         FileMode.Open,
+                                         FileAccess.Read,
+                                         FileShare.Read,
+                                         Convert.ToInt32(NexusModsRestClient.ChunkSize),
+                                         true);
+
+    var bufferSize = checkUploadChunkExists.RequestModel.ResumableChunkNumber != totalChunks
+                       ? Convert.ToUInt32(NexusModsRestClient.ChunkSize)
+                       : Convert.ToUInt32(Convert.ToUInt64(archiveFile.Length) % NexusModsRestClient.ChunkSize);
+
+    var buffer = new byte[bufferSize];
+    var fileOffset = Convert.ToInt64(NexusModsRestClient.ChunkSize) * (checkUploadChunkExists.RequestModel.ResumableChunkNumber - 1);
+    str.Seek(fileOffset, SeekOrigin.Begin);
+    var byteCount = str.Read(buffer);
+
+    str.Close();
+
+    if (byteCount == 0) return null; // No bytes to upload
+
+    Message<
       UploadFileChunkRequest,
       UploadFileChunkRequestModel,
       UploadFileChunkResponse,
       UploadFileChunkResponseModel
-    >>> task3 = task1.ContinueWith(antecedent_task1 =>
-                                   {
-                                     if (antecedent_task1.Status == TaskStatus.Canceled) return null;
-                                     if (antecedent_task1.Result.ResponseModel?.Status ?? false) return null; // Chunk already uploaded
+    > uploadFileChunk = await UploadFileChunk(modId
+                                              , archiveFile
+                                              , cookie
+                                              , fileName
+                                              , version
+                                              , game
+                                              , disableDownloadWithManager
+                                              , disableVersionUpdate
+                                              , disableMainVortex
+                                              , checkUploadChunkExists.RequestModel
+                                              , buffer);
 
-                                     // Open File
-                                     using var str = new FileStream(archiveFile.FullName,
-                                                                    FileMode.Open,
-                                                                    FileAccess.Read,
-                                                                    FileShare.Read,
-                                                                    Convert.ToInt32(NexusModsRestClient.ChunkSize),
-                                                                    true);
-
-                                     var bufferSize = task1.Result.RequestModel.ResumableChunkNumber != totalChunks
-                                                        ? Convert.ToUInt32(NexusModsRestClient.ChunkSize)
-                                                        : Convert.ToUInt32(Convert.ToUInt64(archiveFile.Length) % NexusModsRestClient.ChunkSize);
-
-                                     var buffer = new byte[bufferSize];
-                                     var fileOffset = Convert.ToInt64(NexusModsRestClient.ChunkSize) * (task1.Result.RequestModel.ResumableChunkNumber - 1);
-                                     str.Seek(fileOffset, SeekOrigin.Begin);
-                                     var byteCount = str.Read(buffer);
-
-                                     str.Close();
-
-                                     if (byteCount == 0) return null; // No bytes to upload
-
-                                     var task = UploadFileChunk(modId
-                                                                , archiveFile
-                                                                , cookie
-                                                                , fileName
-                                                                , version
-                                                                , game
-                                                                , disableDownloadWithManager
-                                                                , disableVersionUpdate
-                                                                , disableMainVortex
-                                                                , task1.Result.RequestModel
-                                                                , buffer);
-
-                                     TaskList.Add(new TaskInfo(task, i, nameof(UploadFileChunk)));
-
-                                     return task;
-                                   }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.OnlyOnRanToCompletion);
-    // Report on the results
-    var task4 = task3.Unwrap().ContinueWith(antecedent_task3 =>
-                                            {
-                                              if (antecedent_task3.Status == TaskStatus.Canceled) return null;
-                                              if (antecedent_task3.Result.RequestModel.ResumableChunkNumber != totalChunks) return null;
-
-                                              if (!antecedent_task3.Result.ResponseModel.Uuid.HasValue())
-                                              {
-                                                Console.WriteLine("File uploaded to Nexus Mods, but Id is null".Pastel(ColorOptions.ErrorColor));
-                                                Console.WriteLine();
-                                                Console.WriteLine("Response Details:".Pastel(ColorOptions.ErrorColor));
-                                                Console.WriteLine($"{nameof(antecedent_task3.Result.ResponseModel.UploadFileHash)}: {antecedent_task3.Result.ResponseModel.UploadFileHash}".Pastel(ColorOptions.ErrorColor));
-                                                Console.WriteLine($"{nameof(antecedent_task3.Result.ResponseModel.Status)}: {antecedent_task3.Result.ResponseModel.Status}".Pastel(ColorOptions.ErrorColor));
-                                                Console.WriteLine($"{nameof(antecedent_task3.Result.ResponseModel.Uuid)}: {antecedent_task3.Result.ResponseModel.Uuid}".Pastel(ColorOptions.ErrorColor));
-                                              }
-                                              else
-                                              {
-                                                Console.WriteLine($"File successfully uploaded to Nexus Mods with Id '{antecedent_task3.Result.ResponseModel.Uuid}'".Pastel(ColorOptions.SuccessColor));
-                                              }
-
-                                              return antecedent_task3;
-                                            }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.OnlyOnRanToCompletion);
-
-    // Check for file assemble
-    var task5 = task4.Unwrap().ContinueWith(antecedent_task4 =>
-                                            {
-                                              if (antecedent_task4.Status == TaskStatus.Canceled) return null;
-                                              var task = CheckFileStatus(cookie, antecedent_task4.Result.ResponseModel);
-                                              TaskList.Add(new TaskInfo(task, i, nameof(CheckFileStatus)));
-                                              return task;
-                                            }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.OnlyOnRanToCompletion);
-
-    // Attach file to Mod.
-    var task6 = task5.Unwrap().ContinueWith(antecedent_task5 =>
-                                            {
-                                              if (antecedent_task5.Status == TaskStatus.Canceled) return null;
-                                              if (antecedent_task5.Result.Response.IsSuccessful
-                                                  && antecedent_task5.Result.ResponseModel.FileChunksReassembled)
-                                              {
-                                                Console.WriteLine($"File '{antecedent_task5.Result.RequestModel.Uuid}' confirmed as assembled.".Pastel(ColorOptions.SuccessColor));
-
-                                                // ReSharper disable once UnusedVariable
-                                                var task = AddFileToMod(cookie
-                                                                        , modId
-                                                                        , version
-                                                                        , disableVersionUpdate
-                                                                        , disableMainVortex
-                                                                        , fileName
-                                                                        , archiveFile
-                                                                        , categoryName
-                                                                        , description
-                                                                        , disableDownloadWithManager
-                                                                        , disableRequirementsPopUp
-                                                                        , gameInfoMessage.ResponseModel.Id
-                                                                        , antecedent_task5.Result.RequestModel.Uuid
-                                                                        , antecedent_task5.Result.RequestModel.FileHash
-                                                                        , disableMainFileUpdate
-                                                                        , oldFileId
-                                                                        , newExisting
-                                                                        , removeOldVersion
-                                                                       );
-
-                                                TaskList.Add(new TaskInfo(task, i, nameof(AddFileToMod)));
-
-                                                return task;
-                                              }
-
-                                              Console.WriteLine($"Timeout trying to validate file assembled for '{antecedent_task5.Result.RequestModel.Uuid}'".Pastel(ColorOptions.ErrorColor));
-                                              Console.WriteLine("File upload failed.".Pastel(ColorOptions.ErrorColor));
-
-                                              return null;
-                                            }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.OnlyOnRanToCompletion);
-
-    // ReSharper disable once EntityNameCapturedOnly.Local
-    // ReSharper disable once RedundantAssignment
-    var task7 = task6.Unwrap().ContinueWith(antecedent_task6 =>
-                                            {
-                                              if (antecedent_task6.Status != TaskStatus.Canceled)
-                                              {
-                                                antecedent_task6.Wait();
-                                                Trace.WriteLine("Workflow complete.".Pastel(ColorOptions.StatusColor));
-                                              }
-                                            }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.OnlyOnRanToCompletion);
-
-    // ReSharper restore InconsistentNaming
-    TaskList.Add(new TaskInfo(task2, i, nameof(task2)));
-    TaskList.Add(new TaskInfo(task3, i, nameof(task3)));
-    TaskList.Add(new TaskInfo(task4, i, nameof(task4)));
-    TaskList.Add(new TaskInfo(task5, i, nameof(task5)));
-    TaskList.Add(new TaskInfo(task6, i, nameof(task6)));
-    TaskList.Add(new TaskInfo(task6, i, nameof(task7)));
-    return task1;
+    return !uploadFileChunk.Response.IsSuccessful ? null : uploadFileChunk;
   }
 
   #endregion
@@ -420,7 +400,7 @@ internal static class UploadCommand
                                                         , uploadedFileHash
                                                         , archiveFile.Name
                                                         , !disableRequirementsPopUp
-                                                        , !(disableMainFileUpdate && oldFileId != -1) ? Convert.ToUInt32(oldFileId) : null
+                                                        , disableMainFileUpdate ? null : oldFileId == -1 ? null : Convert.ToUInt32(oldFileId)
                                                         , disableDownloadWithManager
                                                         , newExisting
                                                         , removeOldVersion
@@ -451,7 +431,7 @@ internal static class UploadCommand
       }
       else
       {
-        var msg = AbstractResponseModel.FromJson<MessageResponseModel>(message.Response.Content);
+        var msg = AbstractResponseModel.FromJson<MessageResponseModel>(message.Response.Content.Trim());
         Console.WriteLine($"{message.Response?.StatusDescription}: {msg?.Message}.".Pastel(ColorOptions.ErrorColor));
       }
     }
@@ -514,7 +494,6 @@ internal static class UploadCommand
                             , uint resumableCurrentChunkSize
                             , uint resumableTotalChunks)
   {
-    // Console.WriteLine($"Preparing to upload '{archiveFile.Name}' ({FileSizeFormatter.FormatSize(archiveFile.Length)}) as version {version} to Nexus Mods upload Api.".Pastel(ColorOptions.InfoColor));
     var message = new Message<
       UploadChunkExistsRequest, UploadChunkExistsRequestModel,
       UploadChunkExistsResponse, UploadChunkExistsChunkResponseModel
@@ -726,28 +705,19 @@ internal static class UploadCommand
     Console.WriteLine($"{lastUpload.FileName}, ({lastUpload.FileId})".Pastel(ColorOptions.WarningColor));
   }
 
-  private static void ProcessAllAsyncTasks()
-  {
-    do
-    {
-      Trace.WriteLine($"Tasks: {TaskList.Count}, Completed: {TaskList.Count(t => t.Task.IsCompletedSuccessfully)}, Cancelled:{TaskList.Count(t => t.Task.IsCanceled)}, Faulted: {TaskList.Count(t => t.Task.IsFaulted)}");
-      Task.WaitAll(TaskList.Select(t => t.Task).ToArray(), new TimeSpan(0, 30, 0));
-    } while (TaskList.Count != TaskList.Count(t => t.Task.IsCompleted));
-  }
-
   #endregion
 }
 
 internal class TaskInfo
 {
   internal readonly Task Task;
-  internal readonly int ChunkNumberNumber;
+  internal readonly int ChunkNumber;
   internal readonly string TaskName;
 
   public TaskInfo(Task task, int chunkNumber, string taskName)
   {
     Task = task;
-    ChunkNumberNumber = chunkNumber;
+    ChunkNumber = chunkNumber;
     TaskName = taskName;
   }
 
@@ -756,7 +726,7 @@ internal class TaskInfo
   /// <inheritdoc />
   public override string ToString()
   {
-    return $"{ChunkNumberNumber}, {TaskName}, {Task.Status}";
+    return $"{ChunkNumber}, {TaskName}, {Task.Status}";
   }
 
   #endregion
