@@ -1,18 +1,8 @@
 ﻿using Digitalroot.OdinPlusModUploader.Models;
 using Digitalroot.OdinPlusModUploader.Protocol;
-using System;
 
 namespace Digitalroot.OdinPlusModUploader.Http
 {
-  [Obsolete]
-  public sealed class Message
-  {
-    public AbstractRequest Request { get; set; }
-    public AbstractRequestModel RequestModel { get; set; }
-    public AbstractResponse Response { get; set; }
-    public AbstractResponseModel ResponseModel { get; set; }
-  }
-
   public sealed class Message<TRequest, TRequestModel, TResponse, TResponseModel>
     where TRequest : AbstractRequest
     where TRequestModel : AbstractRequestModel
@@ -24,6 +14,5 @@ namespace Digitalroot.OdinPlusModUploader.Http
     public TResponse Response { get; set; }
     public TResponseModel ResponseModel { get; set; }
     public ErrorResponseModel ErrorResponseModel { get; set; }
-
   }
 }

@@ -61,7 +61,7 @@ namespace Digitalroot.OdinPlusModUploader
 
     private static IHelpBuilder GetHelpBuilder(BindingContext arg)
     {
-      #if DEBUG2
+      #if DEBUG
       return GetUnMaskingHelpBuilder(Console.WindowWidth);
       #else
       return GetMaskingHelpBuilder(Console.WindowWidth);
@@ -70,7 +70,7 @@ namespace Digitalroot.OdinPlusModUploader
 
     private static IHelpBuilder GetHelpBuilder(int maxWidth)
     {
-      #if DEBUG2
+      #if DEBUG
       return GetUnMaskingHelpBuilder(maxWidth);
       #else
       return GetMaskingHelpBuilder(maxWidth);
