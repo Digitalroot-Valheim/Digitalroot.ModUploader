@@ -29,6 +29,7 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Commands;
 internal static class UploadCommand
 {
   private static readonly AutoResetEvent _autoEvent = new(false);
+  private static bool _isErrored = false;
 
   internal static ICommand GetUploadCommand()
   {
@@ -120,6 +121,11 @@ internal static class UploadCommand
         var r = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
         RunUploadWorkFlow(totalChunks); // Upload the last file chunk
         _autoEvent.WaitOne();
+
+        if (_isErrored)
+        {
+          Environment.Exit(1);
+        }
 
         #region Run Workflow
 
@@ -218,6 +224,7 @@ internal static class UploadCommand
           {
             Console.WriteLine(e.Message.Pastel(ColorOptions.ErrorColor));
             Console.WriteLine(e.StackTrace.Pastel(ColorOptions.ErrorColor));
+            _isErrored = true;
             _autoEvent.Set();
           }
         }
@@ -428,11 +435,13 @@ internal static class UploadCommand
         {
           Console.WriteLine($"Exception: {message.ErrorResponseModel.ErrorException}");
         }
+        throw new Exception(message.ErrorResponseModel.ErrorMessage, message.ErrorResponseModel.ErrorException);
       }
       else
       {
         var msg = AbstractResponseModel.FromJson<MessageResponseModel>(message.Response.Content.Trim());
-        Console.WriteLine($"{message.Response?.StatusDescription}: {msg?.Message}.".Pastel(ColorOptions.ErrorColor));
+        Console.WriteLine($"Error: {message.Response?.StatusDescription}: {msg?.Message}.".Pastel(ColorOptions.ErrorColor));
+        throw new Exception(msg?.Message);
       }
     }
 
