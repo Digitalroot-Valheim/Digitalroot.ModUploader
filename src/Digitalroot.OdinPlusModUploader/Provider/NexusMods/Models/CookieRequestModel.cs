@@ -4,10 +4,12 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Models;
 
 internal class CookieRequestModel : AbstractRequestModel
 {
-  internal string Cookie { get; }
+  internal string CookieNexusId { get; }
+  internal string CookieSidDevelop { get; }
 
-  internal CookieRequestModel(string cookie)
+  internal CookieRequestModel(string cookieNexusId, string cookieSidDevelop)
   {
-    Cookie = cookie;
+    CookieNexusId = cookieNexusId;
+    CookieSidDevelop = cookieSidDevelop;
   }
 }

@@ -5,11 +5,13 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Models;
 internal abstract class AbstractAuthorizedRequestModel : AbstractRequestModel
 {
   internal string ApiKey { get; }
-  internal string Cookie { get; }
+  internal string CookieNexusId { get; }
+  internal string CookieSidDevelop { get; }
 
-  internal AbstractAuthorizedRequestModel(string apiKey, string cookie)
+  internal AbstractAuthorizedRequestModel(string apiKey, string cookieNexusId, string cookieSidDevelop)
   {
-    Cookie = cookie;
+    CookieNexusId = cookieNexusId;
+    CookieSidDevelop = cookieSidDevelop;
     ApiKey = apiKey;
   }
 }

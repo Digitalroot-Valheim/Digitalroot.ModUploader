@@ -8,6 +8,7 @@ using Pastel;
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Threading.Tasks;
 
@@ -21,8 +22,9 @@ internal static class CheckCommand
   {
     var command = new Command("check", "Check that an API Key and Cookie are valid.")
     {
-      CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: Digitalroot.OdinPlusModUploader.Provider.NexusMods.Validators.ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
-      , CommandHelper.GetOption(new[] { "--cookie", "-c" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE"), optionValidatorsFactory: Digitalroot.OdinPlusModUploader.Provider.NexusMods.Validators.ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--cookie_nexusid", "-cnxid" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE_NEXUSID".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE_NEXUSID"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--cookie_sid_develop", "-csid" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE_SID_DEVELOP".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE_SID_DEVELOP"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
     };
 
     command.Handler = GetCommandHandler();
@@ -33,17 +35,17 @@ internal static class CheckCommand
 
   private static ICommandHandler GetCommandHandler()
   {
-    return CommandHandler.Create<string, string>(async (key, cookie) =>
+    return CommandHandler.Create<string, string, string>(async (key, cookie_nexusid, cookie_sid_develop) =>
                                                  {
                                                    var checkApiKeyMessage = await CheckApiKey(key);
                                                    Console.WriteLine(checkApiKeyMessage.Response.IsApiKeyValid ? "API key successfully validated!".Pastel(Color.Green) : "API key validation failed!".Pastel(Color.Orange));
 
-                                                   var checkCookieMessage = await CheckCookie(cookie);
+                                                   var checkCookieMessage = await CheckCookie(cookie_nexusid, cookie_sid_develop);
                                                    Console.WriteLine(checkCookieMessage.ResponseModel.IsCookieValid ? "Cookies successfully validated!".Pastel(Color.Green) : "Cookie validation failed!".Pastel(Color.Orange));
                                                  });
   }
 
-  [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
+  [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
   private static async Task<Message<
     CheckApiKeyRequest, ApiKeyRequestModel,
     CheckApiKeyResponse, UserResponseModel
@@ -57,14 +59,14 @@ internal static class CheckCommand
     return message;
   }
 
-  [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
+  [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
   private static async Task<Message<
     CheckCookieRequest, CookieRequestModel,
     CheckCookieResponse, CheckCookieResponseModel
-  >> CheckCookie(string cookie)
+  >> CheckCookie(string cookieNexusId, string cookieSidDevelop)
   {
     var message = new Message<CheckCookieRequest, CookieRequestModel, CheckCookieResponse, CheckCookieResponseModel>();
-    message.RequestModel = new CookieRequestModel(cookie);
+    message.RequestModel = new CookieRequestModel(cookieNexusId, cookieSidDevelop);
     message.Request = new CheckCookieRequest(message.RequestModel);
     message.Response = await CommandUtils.RestClient.ExecuteAsync(message.Request);
     message.ResponseModel = new CheckCookieResponseModel(message.Response);

@@ -12,7 +12,7 @@ internal class UploadChunkExistsResponse : AbstractResponse<UploadChunkExistsChu
   internal UploadChunkExistsRequestModel RequestModel { get; set; }
 
   /// <inheritdoc />
-  public UploadChunkExistsResponse(IRestResponse<UploadChunkExistsChunkResponseModel> response)
+  public UploadChunkExistsResponse(RestResponse<UploadChunkExistsChunkResponseModel> response)
     : base(response)
   {
     Exists = IsSuccessful && !string.IsNullOrEmpty(Content);

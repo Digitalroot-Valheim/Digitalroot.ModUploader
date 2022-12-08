@@ -1,7 +1,5 @@
 # OdinPlus Mod Uploader
 
-[![Release](https://github.com/Digitalroot-Valheim/Digitalroot.OdinPlusModUploader/actions/workflows/release.yml/badge.svg)](https://github.com/Digitalroot-Valheim/Digitalroot.OdinPlusModUploader/actions/workflows/release.yml)
-
 ## Introduction
 
 This is a command-line tool that can be used to upload mod files to an existing mod on Thunderstore, ModVault and Nexus Mods.
@@ -27,7 +25,8 @@ Please use environment variables for the sensitive information.
 
 ### Environment Variables
 - __NEXUSMOD_API_KEY__ 
-- __NEXUSMOD_COOKIE__
+- __NEXUSMOD_COOKIE_NEXUSID__
+- __NEXUSMOD_COOKIE_SID_DEVELOP__
 
 All Commands support the `-?, -h, --help` options to show help and usage information
 
@@ -79,7 +78,8 @@ Usage:
 
 Options:
   -k, --key <key>        Api Key, ENV: NEXUSMOD_API_KEY
-  -c, --cookie <cookie>  Session Cookie, ENV: NEXUSMOD_COOKIE
+  -cnxid, --cookie_nexusid <cookie value>  Session Cookie, ENV: NEXUSMOD_COOKIE_NEXUSID
+  -csid,  --cookie_sid_develop <cookie value>  Session Cookie, ENV: NEXUSMOD_COOKIE_SID_DEVELOP
   -?, -h, --help         Show help and usage information
 ```
 ---
@@ -108,13 +108,14 @@ Options:
   -dmv, --disable-main-vortex                                          Skips setting file as the main Vortex file. [default: False]
   -drpu, --disable-requirements-pop-up                                 Skips informing downloaders of this mod's requirements before they attempt to download this file [default: False]
   -k, --key <key>                                                      Api Key, ENV: NEXUSMOD_API_KEY
-  -c, --cookie <cookie>                                                Session Cookie, ENV: NEXUSMOD_COOKIE
+  -cnxid, --cookie_nexusid <cookie value>                              Session Cookie, ENV: NEXUSMOD_COOKIE_NEXUSID
+  -csid,  --cookie_sid_develop <cookie value>                          Session Cookie, ENV: NEXUSMOD_COOKIE_SID_DEVELOP
   -?, -h, --help                                                       Show help and usage information
 ```
 
 #### Examples
 ```bash
-nexusmods check -k "7a0e--MyVeryLongNexusApiKey--377" -c "%7B%22mechanism--MyVeryLongNexusSessionCookieValue--%22%7D"
+nexusmods check -k "7a0e--MyVeryLongNexusApiKey--377" -cnxid "%7B%22mechanism--MyVeryLongNexusSessionCookieValue--%22%7D" -csid "%7B%22mechanism--MyVeryLongNexusSessionCookieSessIdValue--%22%7D"
 ```
 ---
 ```bash
@@ -136,9 +137,9 @@ nexusmods upload 1303 "Digitalroot.Valheim.JVL.BT.Fix.v1.0.6.zip" -v "1.0.6" -f 
 ##### Q3: Where do I get my Nexus Mods' API key? 
 > [My Nexus account page](https://www.nexusmods.com/users/myaccount?tab=api%20access)
 
-##### Q4: Where do I get my Nexus Mods' Session Cookie? 
+##### Q4: Where do I get my Nexus Mods' Session Cookies? 
 > From your browser. This [site](https://www.cookieyes.com/how-to-check-cookies-on-your-website-manually/) covers how to do it in most browers.
-> The cookie you are looking for is called `nexusid` and starts with `%7B%22mechanism`. This is the html encoded value for `{"mechanism`. 
+> The cookies you are looking for are called `nexusid` and `sid_develop`. They starts with `%7B%22mechanism`. This is the html encoded value for `{"mechanism`. 
 > If your browser displays a cookie value starting with `{"mechanism` then you will need to html encode the value before using this tool.
 
  

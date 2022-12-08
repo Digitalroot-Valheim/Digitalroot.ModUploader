@@ -16,13 +16,14 @@ internal class UploadFileMetaDataRequestModel : CookieRequestModel
   public readonly uint ResumableTotalChunks;
 
   /// <inheritdoc />
-  internal UploadFileMetaDataRequestModel(string cookie
+  internal UploadFileMetaDataRequestModel(string cookieNexusId
+                                          , string cookiesid_develop
                                           , string resumableFilename
                                           , ulong resumableTotalSize
                                           , uint resumableChunkNumber
                                           , uint resumableCurrentChunkSize
                                           , uint resumableTotalChunks)
-    : base(cookie)
+    : base(cookieNexusId, cookiesid_develop)
   {
     ResumableFilename = resumableFilename;
     ResumableTotalSize = resumableTotalSize;

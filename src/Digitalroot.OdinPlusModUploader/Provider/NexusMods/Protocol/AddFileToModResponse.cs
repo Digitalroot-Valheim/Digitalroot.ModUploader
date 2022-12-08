@@ -11,7 +11,7 @@ internal class AddFileToModResponse : AbstractResponse<AddFileToModResponseModel
   internal readonly bool IsFileAdded;
 
   /// <inheritdoc />
-  public AddFileToModResponse(IRestResponse<AddFileToModResponseModel> response)
+  public AddFileToModResponse(RestResponse<AddFileToModResponseModel> response)
     : base(response)
   {
     IsFileAdded = response?.Data != null 

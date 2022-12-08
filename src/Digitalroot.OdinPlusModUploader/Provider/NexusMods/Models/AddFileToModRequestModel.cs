@@ -11,26 +11,25 @@ internal class AddFileToModRequestModel : CookieRequestModel
   public readonly string FileVersion;    // 1.0.5+
   public readonly bool UpdateVersion;    // 1+
   public readonly CategoryName Category; // 1+
-  public readonly string BriefOverview;  // Your file description should go here.+
-  public readonly bool SetAsMainNmm;     // 1 +
-
-  // ReSharper disable once InconsistentNaming
-  public readonly string FileUUID;       // bb5cf2cf-42ec-4877-95c8-65ab31391bc3+
-  public readonly long FileSize;         // 14782+
-  public readonly uint ModID;            // 1432+
-  public readonly uint ID;               // 1432
-  public readonly string Action;         // add +
-  public readonly string UploadedFile;   // 14782-727fdf8204465e77205adf507b9c4e89+
-  public readonly string OriginalFile;   // Digitalroot.Valheim.JVL.BT.Fix.v1.0.0.zip+
-  public readonly bool RequirementPopUp; // 1 +
-  public readonly bool RemoveNmmButton;  // 1 +
-  public readonly uint? OldFileId;       // 7515
   public readonly bool NewExisting;      // 1
+  public readonly uint? OldFileId;       // 7515
   public readonly bool RemoveOldVersion; // 1
-
+  public readonly string BriefOverview;  // Your file description should go here.+
+  public readonly bool RequirementPopUp; // 1 +
+  // ReSharper disable once InconsistentNaming
+  public readonly string FileUUID;     // bb5cf2cf-42ec-4877-95c8-65ab31391bc3+
+  public readonly long FileSize;       // 14782+
+  public readonly uint ModID;          // 1432+
+  public readonly uint ID;             // 1432
+  public readonly string Action;       // add +
+  public readonly string UploadedFile; // 14782-727fdf8204465e77205adf507b9c4e89+
+  public readonly string OriginalFile; // Digitalroot.Valheim.JVL.BT.Fix.v1.0.0.zip+
+  public readonly bool SetAsMainNmm;   // 1 +
+  public readonly bool RemoveNmmButton;  // 1 +
 
   /// <inheritdoc />
-  internal AddFileToModRequestModel(string cookie
+  internal AddFileToModRequestModel(string cookieNexusId
+                                    , string cookiesid_develop
                                     , int gameId
                                     , string name
                                     , string fileVersion
@@ -50,7 +49,7 @@ internal class AddFileToModRequestModel : CookieRequestModel
                                     , bool removeNmmButton
                                     , bool newExisting
                                     , bool removeOldVersion)
-    : base(cookie)
+    : base(cookieNexusId, cookiesid_develop)
   {
     GameId = gameId;                     //
     Name = name;                         //

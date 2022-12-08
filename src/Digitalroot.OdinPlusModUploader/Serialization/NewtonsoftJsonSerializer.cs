@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using RestSharp;
-using RestSharp.Deserializers;
 using RestSharp.Serializers;
 using System.IO;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
@@ -40,7 +39,7 @@ namespace Digitalroot.OdinPlusModUploader.Serialization
       return stringWriter.ToString();
     }
 
-    public T Deserialize<T>(IRestResponse response)
+    public T Deserialize<T>(RestResponse response)
     {
       var content = response.Content;
 
@@ -57,5 +56,13 @@ namespace Digitalroot.OdinPlusModUploader.Serialization
                                                             , Formatting = Formatting.Indented
                                                             , ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                                                           });
+
+    public static JsonSerializerSettings DefaultSettings => new JsonSerializerSettings
+                                                         {
+                                                           NullValueHandling = NullValueHandling.Ignore
+                                                           , MissingMemberHandling = MissingMemberHandling.Ignore
+                                                           , Formatting = Formatting.Indented
+                                                           , ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                                         };
   }
 }

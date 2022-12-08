@@ -9,18 +9,19 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class UploadFileChunkRequest : AbstractAuthorizedRequest
 {
   public UploadFileChunkRequest(UploadFileChunkRequestModel uploadFileChunkRequestModel)
-    : base(uploadFileChunkRequestModel, "uploads/chunk", Method.POST)
+    : base(uploadFileChunkRequestModel, "uploads/chunk", Method.Post)
   {
-    AddParameter("resumableChunkNumber", uploadFileChunkRequestModel.ResumableChunkNumber);
-    AddParameter("resumableChunkSize", uploadFileChunkRequestModel.ResumableChunkSize);
-    AddParameter("resumableCurrentChunkSize", uploadFileChunkRequestModel.ResumableCurrentChunkSize);
-    AddParameter("resumableTotalSize", uploadFileChunkRequestModel.ResumableTotalSize);
-    AddParameter("resumableType", uploadFileChunkRequestModel.ResumableType);
-    AddParameter("resumableIdentifier", uploadFileChunkRequestModel.ResumableIdentifier);
-    AddParameter("resumableFilename", uploadFileChunkRequestModel.ResumableFilename);
-    AddParameter("resumableRelativePath", uploadFileChunkRequestModel.ResumableRelativePath);
-    AddParameter("resumableTotalChunks", uploadFileChunkRequestModel.ResumableTotalChunks);
-    AddFileBytes("file", uploadFileChunkRequestModel.Buffer, "blob");
+    this.AddParameter("resumableChunkNumber", uploadFileChunkRequestModel.ResumableChunkNumber);
+    this.AddParameter("resumableChunkSize", uploadFileChunkRequestModel.ResumableChunkSize);
+    this.AddParameter("resumableCurrentChunkSize", uploadFileChunkRequestModel.ResumableCurrentChunkSize);
+    this.AddParameter("resumableTotalSize", uploadFileChunkRequestModel.ResumableTotalSize);
+    this.AddParameter("resumableType", uploadFileChunkRequestModel.ResumableType);
+    this.AddParameter("resumableIdentifier", uploadFileChunkRequestModel.ResumableIdentifier);
+    this.AddParameter("resumableFilename", uploadFileChunkRequestModel.ResumableFilename);
+    this.AddParameter("resumableRelativePath", uploadFileChunkRequestModel.ResumableRelativePath);
+    this.AddParameter("resumableTotalChunks", uploadFileChunkRequestModel.ResumableTotalChunks);
+    // this.AddFileBytes("file", uploadFileChunkRequestModel.Buffer, "blob");
+    this.AddFile("file", uploadFileChunkRequestModel.Buffer, "blob");
   }
 
   private static int GetChunkCount(FileInfo archiveFile)

@@ -10,6 +10,6 @@ internal class CheckApiKeyResponse : AbstractResponse<UserResponseModel>
   internal bool IsApiKeyValid => IsSuccessful;
 
   /// <inheritdoc />
-  public CheckApiKeyResponse(IRestResponse<UserResponseModel> response)
+  public CheckApiKeyResponse(RestResponse<UserResponseModel> response)
     : base(response) { }
 }

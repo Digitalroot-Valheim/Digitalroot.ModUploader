@@ -8,6 +8,6 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class CheckFileStatusResponse : AbstractResponse<CheckFileStatusResponseModel>
 {
   /// <inheritdoc />
-  public CheckFileStatusResponse(IRestResponse<CheckFileStatusResponseModel> response)
+  public CheckFileStatusResponse(RestResponse<CheckFileStatusResponseModel> response)
     : base(response) { }
 }

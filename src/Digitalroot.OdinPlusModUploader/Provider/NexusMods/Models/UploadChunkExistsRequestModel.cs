@@ -6,26 +6,30 @@ internal class UploadChunkExistsRequestModel : UploadFileMetaDataRequestModel
 {
   /// <inheritdoc />
   // ReSharper disable once MemberCanBePrivate.Global
-  internal UploadChunkExistsRequestModel(string cookie
+  internal UploadChunkExistsRequestModel(string cookieNexusId
+                                        , string cookiesid_develop
                                         , string resumableFilename
                                         , ulong resumableTotalSize
                                         , uint resumableChunkNumber
                                         , uint resumableCurrentChunkSize
                                         , uint resumableTotalChunks)
-    : base(cookie
+    : base(cookieNexusId
+           , cookiesid_develop
            , resumableFilename
            , resumableTotalSize
            , resumableChunkNumber
            , resumableCurrentChunkSize
            , resumableTotalChunks) { }
 
-  internal UploadChunkExistsRequestModel(string cookie
+  internal UploadChunkExistsRequestModel(string cookieNexusId
+                                        , string cookieCookiesid
                                         , string resumableFilename
                                         , long resumableTotalSize
                                         , uint resumableChunkNumber
                                         , uint resumableCurrentChunkSize
                                         , uint resumableTotalChunks)
-    : this(cookie
+    : this(cookieNexusId
+           , cookieCookiesid
            , resumableFilename
            , Convert.ToUInt64(resumableTotalSize)
            , resumableChunkNumber

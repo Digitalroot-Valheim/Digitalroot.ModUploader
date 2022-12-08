@@ -7,6 +7,6 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class ModFilesInfoResponse : AbstractResponse<ModFilesInfoResponseModel>
 {
   /// <inheritdoc />
-  public ModFilesInfoResponse(IRestResponse<ModFilesInfoResponseModel> response)
+  public ModFilesInfoResponse(RestResponse<ModFilesInfoResponseModel> response)
     : base(response) { }
 }

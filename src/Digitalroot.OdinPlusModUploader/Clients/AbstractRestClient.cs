@@ -2,6 +2,8 @@
 using Digitalroot.OdinPlusModUploader.Models;
 using Digitalroot.OdinPlusModUploader.Protocol;
 using Digitalroot.OdinPlusModUploader.Provider.NexusMods;
+using Digitalroot.OdinPlusModUploader.Provider.NexusMods.Models;
+using Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 using Digitalroot.OdinPlusModUploader.Serialization;
 using Newtonsoft.Json;
 using RestSharp;
@@ -45,7 +47,7 @@ namespace Digitalroot.OdinPlusModUploader.Clients
     /// e.g. [JsonProperty(PropertyName = "country")]
     /// </summary>
     /// <param name="restClient"></param>
-    private protected static void SetNewtonsoftJsonSerializerAsHandler(IRestClient restClient)
+    private protected static void SetNewtonsoftJsonSerializerAsHandler(RestClient restClient)
     {
       restClient.UseNewtonsoftJson(new JsonSerializerSettings
       {
@@ -54,22 +56,22 @@ namespace Digitalroot.OdinPlusModUploader.Clients
       });
     }
 
-    internal static ErrorResponseModel GetErrorMessage(IRestResponse response)
+    internal static ErrorResponseModel GetErrorMessage(RestResponse response)
     {
       return new ErrorResponseModel(response);
     }
 
     [Conditional("TRACE")]
-    private static void TraceRequest(IRestClient restClient, IRestRequest request)
+    private static void TraceRequest(RestClient restClient, RestRequest request)
     {
-      Trace.WriteLine($"** Request ** - {request.Method}: {restClient.BaseUrl}{request.Resource}");
+      Trace.WriteLine($"** Request ** - {request.Method}: {restClient.Options.BaseUrl}{request.Resource}");
       Trace.WriteLine("[Payload:]");
       Trace.WriteLine(NewtonsoftJsonSerializer.Default.Serialize(request.Parameters));
       Trace.WriteLine(string.Empty);
     }
 
     [Conditional("TRACE")]
-    private static void TraceResponse(IRestResponse response)
+    private static void TraceResponse(RestResponse response)
     {
       Trace.WriteLine($"** Response ** - IsSuccessful: {response.IsSuccessful}, StatusCode: {response.StatusCode}");
       Trace.WriteLine("[Headers:]");
@@ -79,7 +81,7 @@ namespace Digitalroot.OdinPlusModUploader.Clients
       switch (response.ContentType)
       {
         case "application/json; charset=utf-8":
-          // Print nothing. JSON data is printed via TraceResponse<TRestResponseModel>(IRestResponse response, TRestResponseModel data)
+          // Print nothing. JSON data is printed via TraceResponse<TRestResponseModel>(RestResponse response, TRestResponseModel data)
           break;
 
         case "text/html; charset=utf-8":
@@ -111,7 +113,7 @@ namespace Digitalroot.OdinPlusModUploader.Clients
     }
 
     [Conditional("TRACE")]
-    private static void TraceResponse<TRestResponseModel>(IRestResponse response, TRestResponseModel data)
+    private static void TraceResponse<TRestResponseModel>(RestResponse response, TRestResponseModel data)
     {
       TraceResponse(response);
       if (data == null) return;
@@ -126,14 +128,14 @@ namespace Digitalroot.OdinPlusModUploader.Clients
     #region Obsolete
 
     [Obsolete("Use Async Version")]
-    protected static TRestResponse Get<TRestResponse>(IRestClient restClient, IRestRequest request)
+    protected static TRestResponse Get<TRestResponse>(RestClient restClient, RestRequest request)
     {
       var response = restClient.Get(request);
       return (TRestResponse)Activator.CreateInstance(typeof(TRestResponse), response);
     }
 
     [Obsolete("Use Async Version")]
-    protected static TRestResponse Get<TRestResponse, TRestResponseModel>(IRestClient restClient, IRestRequest request)
+    protected static TRestResponse Get<TRestResponse, TRestResponseModel>(RestClient restClient, RestRequest request)
       where TRestResponse : AbstractResponse
     {
       var response = restClient.Get<TRestResponseModel>(request);
@@ -141,7 +143,7 @@ namespace Digitalroot.OdinPlusModUploader.Clients
     }
 
     [Obsolete("This might be restored")]
-    protected static async Task<TRestResponse> PostAsync<TRestResponse>(IRestClient restClient, IRestRequest request)
+    protected static async Task<TRestResponse> PostAsync<TRestResponse>(RestClient restClient, RestRequest request)
     {
       var response = await restClient.ExecutePostAsync(request);
       return (TRestResponse)Activator.CreateInstance(typeof(TRestResponse), response);
@@ -151,19 +153,35 @@ namespace Digitalroot.OdinPlusModUploader.Clients
 
     #region GetAsync
 
-    protected static async Task<TRestResponse> GetAsync<TRestResponse>(IRestClient restClient, IRestRequest request)
+    //AbstractAuthorizedRequest
+
+    protected static async Task<TRestResponse> GetAsync<TRestResponse>(RestClient restClient, RestRequest request)
       where TRestResponse : AbstractResponse
     {
       TraceRequest(restClient, request);
+
+      if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
+      {
+        restClient.AddCookie("nexusid", model.CookieNexusId, "/", ".nexusmods.com");
+        restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
+      }
+
       var response = await restClient.ExecuteGetAsync(request);
       TraceResponse(response);
       return (TRestResponse)Activator.CreateInstance(typeof(TRestResponse), response);
     }
 
-    protected static async Task<TRestResponse> GetAsync<TRestResponse, TRestResponseModel>(IRestClient restClient, IRestRequest request)
+    protected static async Task<TRestResponse> GetAsync<TRestResponse, TRestResponseModel>(RestClient restClient, RestRequest request)
       where TRestResponse : AbstractResponse
     {
       TraceRequest(restClient, request);
+
+      if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
+      {
+        restClient.AddCookie("nexusid", model.CookieNexusId, "/", ".nexusmods.com");
+        restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
+      }
+
       var response = await restClient.ExecuteGetAsync<TRestResponseModel>(request);
       TraceResponse(response, response.Data);
 
@@ -174,10 +192,19 @@ namespace Digitalroot.OdinPlusModUploader.Clients
 
     #region PostAsync
 
-    protected static async Task<TRestResponse> PostAsync<TRestResponse, TRestResponseModel>(IRestClient restClient, IRestRequest request)
+    protected static async Task<TRestResponse> PostAsync<TRestResponse, TRestResponseModel>(RestClient restClient, RestRequest request)
       where TRestResponse : AbstractResponse
     {
+      TraceRequest(restClient, request);
+
+      if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
+      {
+        restClient.AddCookie("nexusid", model.CookieNexusId, "/", ".nexusmods.com");
+        restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
+      }
+
       var response = await restClient.ExecutePostAsync<TRestResponseModel>(request);
+      TraceResponse(response, response.Data);
       return (TRestResponse)Activator.CreateInstance(typeof(TRestResponse), response);
     }
 

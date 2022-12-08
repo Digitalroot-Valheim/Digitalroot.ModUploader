@@ -6,15 +6,15 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class SaveDocumentationRequest : AbstractAuthorizedRequest
 {
   public SaveDocumentationRequest(SaveDocumentationRequestModel saveDocumentationRequestModel)
-    : base(saveDocumentationRequestModel, "Core/Libs/Common/Managers/Mods?SaveDocumentation", Method.POST)
+    : base(saveDocumentationRequestModel, "Core/Libs/Common/Managers/Mods?SaveDocumentation", Method.Post)
   {
-    AddParameter("game_id", saveDocumentationRequestModel.GameId);
-    AddParameter("id", saveDocumentationRequestModel.ModId);
-    AddParameter("input-method", saveDocumentationRequestModel.InputMethod);
-    AddParameter("new-change[]", saveDocumentationRequestModel.NewChange);
-    AddParameter("new-version[]", saveDocumentationRequestModel.NewVersion);
-    AddParameter("action", saveDocumentationRequestModel.Action);
-    AddParameter("readme-file", saveDocumentationRequestModel.ReadMeFile);
+    this.AddParameter("game_id", saveDocumentationRequestModel.GameId);
+    this.AddParameter("id", saveDocumentationRequestModel.ModId);
+    this.AddParameter("input-method", saveDocumentationRequestModel.InputMethod);
+    this.AddParameter("new-change[]", saveDocumentationRequestModel.NewChange);
+    this.AddParameter("new-version[]", saveDocumentationRequestModel.NewVersion);
+    this.AddParameter("action", saveDocumentationRequestModel.Action);
+    this.AddParameter("readme-file", saveDocumentationRequestModel.ReadMeFile);
     
   }
 }

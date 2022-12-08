@@ -6,8 +6,8 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class CheckFileStatusRequest : AbstractAuthorizedRequest
 {
   public CheckFileStatusRequest(CheckFileStatusRequestModel checkFileStatusRequestModel)
-    : base(checkFileStatusRequestModel, $"uploads/check_status", Method.GET)
+    : base(checkFileStatusRequestModel, $"uploads/check_status", Method.Get)
   {
-    AddQueryParameter("id", checkFileStatusRequestModel.Uuid);
+    this.AddQueryParameter("id", checkFileStatusRequestModel.Uuid);
   }
 }

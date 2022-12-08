@@ -19,20 +19,22 @@ internal class UploadFileChunkRequestModel : UploadFileMetaDataRequestModel
   public byte[] Buffer { get; }
 
   /// <inheritdoc />
-  internal UploadFileChunkRequestModel(string cookie
-                                     , uint modId
-                                     , FileInfo archiveFile
-                                     , string fileName
-                                     , string version
-                                     , string game
-                                     , bool removeDownloadWithManager
-                                     , bool noVersionUpdate
-                                     , bool setMainVortex
-                                     , uint resumableChunkNumber
-                                     , uint resumableCurrentChunkSize
-                                     , uint resumableTotalChunks
-                                     , byte[] buffer)
-    : base(cookie
+  internal UploadFileChunkRequestModel(string cookieNexusId
+                                       , string cookiesid_develop
+                                       , uint modId
+                                       , FileInfo archiveFile
+                                       , string fileName
+                                       , string version
+                                       , string game
+                                       , bool removeDownloadWithManager
+                                       , bool noVersionUpdate
+                                       , bool setMainVortex
+                                       , uint resumableChunkNumber
+                                       , uint resumableCurrentChunkSize
+                                       , uint resumableTotalChunks
+                                       , byte[] buffer)
+    : base(cookieNexusId
+           , cookiesid_develop
            , archiveFile.Name
            , Convert.ToUInt64(archiveFile.Length)
            , resumableChunkNumber

@@ -7,6 +7,6 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class CheckCookieResponse : AbstractResponse
 {
   /// <inheritdoc />
-  public CheckCookieResponse(IRestResponse response)
+  public CheckCookieResponse(RestResponse response)
     : base(response) { }
 }

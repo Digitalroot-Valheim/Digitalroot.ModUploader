@@ -6,7 +6,7 @@ namespace Digitalroot.OdinPlusModUploader.Protocol;
 
 public abstract class AbstractResponse
 {
-  private readonly IRestResponse _restResponse;
+  private readonly RestResponse _restResponse;
 
   internal string Content => _restResponse.Content;
   internal bool IsSuccessful => _restResponse.IsSuccessful;
@@ -16,9 +16,9 @@ public abstract class AbstractResponse
   internal HttpStatusCode StatusCode => _restResponse.StatusCode;
 
   [Newtonsoft.Json.JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
-  internal IRestResponse RawRestResponse => _restResponse;
+  internal RestResponse RawRestResponse => _restResponse;
 
-  private protected AbstractResponse(IRestResponse response)
+  private protected AbstractResponse(RestResponse response)
   {
     _restResponse = response;
   }
@@ -30,7 +30,7 @@ internal abstract class AbstractResponse<T> : AbstractResponse
   internal T Data { get; }
 
   /// <inheritdoc />
-  protected AbstractResponse(IRestResponse<T> response)
+  protected AbstractResponse(RestResponse<T> response)
     : base(response)
   {
     Data = response.Data;

@@ -8,6 +8,6 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class UploadFileChunkResponse : AbstractResponse<UploadFileChunkResponseModel>
 {
   /// <inheritdoc />
-  public UploadFileChunkResponse(IRestResponse<UploadFileChunkResponseModel> response)
+  public UploadFileChunkResponse(RestResponse<UploadFileChunkResponseModel> response)
     : base(response) { }
 }

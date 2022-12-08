@@ -6,16 +6,16 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class UploadChunkExistsRequest : AbstractAuthorizedRequest
 {
   public UploadChunkExistsRequest(UploadChunkExistsRequestModel uploadChunkExistsRequestModel)
-    : base(uploadChunkExistsRequestModel, "uploads/chunk", Method.GET)
+    : base(uploadChunkExistsRequestModel, "uploads/chunk", Method.Get)
   {
-    AddQueryParameter("resumableChunkNumber", uploadChunkExistsRequestModel.ResumableChunkNumber.ToString());
-    AddQueryParameter("resumableChunkSize", uploadChunkExistsRequestModel.ResumableChunkSize.ToString());
-    AddQueryParameter("resumableCurrentChunkSize", uploadChunkExistsRequestModel.ResumableCurrentChunkSize.ToString());
-    AddQueryParameter("resumableTotalSize", uploadChunkExistsRequestModel.ResumableTotalSize.ToString());
-    AddQueryParameter("resumableType", uploadChunkExistsRequestModel.ResumableType, true);
-    AddQueryParameter("resumableIdentifier", uploadChunkExistsRequestModel.ResumableIdentifier, true);
-    AddQueryParameter("resumableFilename", uploadChunkExistsRequestModel.ResumableFilename, true);
-    AddQueryParameter("resumableRelativePath", uploadChunkExistsRequestModel.ResumableRelativePath, true);
-    AddQueryParameter("resumableTotalChunks", uploadChunkExistsRequestModel.ResumableTotalChunks.ToString());
+    this.AddQueryParameter("resumableChunkNumber", uploadChunkExistsRequestModel.ResumableChunkNumber.ToString());
+    this.AddQueryParameter("resumableChunkSize", uploadChunkExistsRequestModel.ResumableChunkSize.ToString());
+    this.AddQueryParameter("resumableCurrentChunkSize", uploadChunkExistsRequestModel.ResumableCurrentChunkSize.ToString());
+    this.AddQueryParameter("resumableTotalSize", uploadChunkExistsRequestModel.ResumableTotalSize.ToString());
+    this.AddQueryParameter("resumableType", uploadChunkExistsRequestModel.ResumableType, true);
+    this.AddQueryParameter("resumableIdentifier", uploadChunkExistsRequestModel.ResumableIdentifier, true);
+    this.AddQueryParameter("resumableFilename", uploadChunkExistsRequestModel.ResumableFilename, true);
+    this.AddQueryParameter("resumableRelativePath", uploadChunkExistsRequestModel.ResumableRelativePath, true);
+    this.AddQueryParameter("resumableTotalChunks", uploadChunkExistsRequestModel.ResumableTotalChunks.ToString());
   }
 }

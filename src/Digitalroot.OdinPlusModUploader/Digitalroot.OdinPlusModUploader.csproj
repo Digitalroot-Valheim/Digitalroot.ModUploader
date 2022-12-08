@@ -11,7 +11,7 @@
     <ToolCommandName>opmu</ToolCommandName>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright © Digitalroot Technologies 2021 - 2022</Copyright>
+    <Copyright>Copyright © Digitalroot Technologies 2021 - 2023</Copyright>
     <PackageProjectUrl>https://github.com/Digitalroot-Valheim/Digitalroot.OdinPlusModUploader</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Digitalroot-Valheim/Digitalroot.OdinPlusModUploader</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -29,7 +29,7 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-    <VersionPrefix>1.0.12</VersionPrefix>
+    <VersionPrefix>1.1.0</VersionPrefix>
     <RestoreAdditionalProjectSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json;
       https://digitalroot-valheim-nuget.s3.us-west-2.amazonaws.com/index.json
@@ -48,13 +48,13 @@
 
   <ItemGroup>
     <None Include="..\ico\ValheimRcon_color.png" Pack="true" PackagePath="\" />
-    <None Include="..\..\docs\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\..\docs\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pastel" Version="3.0.0" />
-    <PackageReference Include="RestSharp" Version="106.13.0" />
-    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.13.0" />
+    <PackageReference Include="Pastel" Version="4.0.2" />
+    <PackageReference Include="RestSharp" Version="108.0.3" />
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="108.0.3" />
     <PackageReference Include="System.CommandLine" Version="[2.0.0-beta1.21568.1]" />
   </ItemGroup>
 

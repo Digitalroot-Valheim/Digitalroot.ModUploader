@@ -3,6 +3,8 @@ name: Release
 concurrency: ci-${{ github.ref }}
 
 on:
+  workflow_dispatch:
+  
   push:
     branches: [ main, develop ] # Default release branch
     paths:

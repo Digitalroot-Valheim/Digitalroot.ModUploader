@@ -8,6 +8,6 @@ namespace Digitalroot.OdinPlusModUploader.Provider.NexusMods.Protocol;
 internal class GameInfoResponse : AbstractResponse<GameInfoResponseModel>
 {
   /// <inheritdoc />
-  public GameInfoResponse(IRestResponse<GameInfoResponseModel> response)
+  public GameInfoResponse(RestResponse<GameInfoResponseModel> response)
     : base(response) { }
 }

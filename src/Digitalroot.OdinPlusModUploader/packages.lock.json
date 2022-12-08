@@ -4,24 +4,24 @@
     "net6.0": {
       "Pastel": {
         "type": "Direct",
-        "requested": "[3.0.0, )",
-        "resolved": "3.0.0",
-        "contentHash": "Y1EEIxj52o0mO4J/AKwtSDdVoFSNFZcBDm1dtPrngMkgne5QgcC5hIs+9gd31jp5ASEZ2YZpgI88xADSDCNZ7w=="
+        "requested": "[4.0.2, )",
+        "resolved": "4.0.2",
+        "contentHash": "tNbthiPTiDA4wdz8UeYXaJVSV8P6attDFaFUd854f/0JT9N1U1CGO7AOd7fcb4IQexY69X2SuQjvGe+jmmbwcw=="
       },
       "RestSharp": {
         "type": "Direct",
-        "requested": "[106.13.0, )",
-        "resolved": "106.13.0",
-        "contentHash": "vwUdmmtC5vtePeNfBWnFcixBF2KjUeVv3ss4ZFzCIkOf7NB7W/9qX8JNZD9DOrz2yGk4AJW8k9znwgPZhnoiNg=="
+        "requested": "[108.0.3, )",
+        "resolved": "108.0.3",
+        "contentHash": "phq1AkVhqVXHZxvWDV4fJEJKCR5OHNFUGx2Ix8o5EFShS6654oZhth4X2RWvaU/W7UexIswW0T+lTirxfLU2Ow=="
       },
       "RestSharp.Serializers.NewtonsoftJson": {
         "type": "Direct",
-        "requested": "[106.13.0, )",
-        "resolved": "106.13.0",
-        "contentHash": "/nPcSkeyRiK4+q/IGlVuv9P2FYChIRvrVpm4d1/iGsMFzTu4n2VyXPAm7IcnvLdR/oczrAQ28w74Ejkf0cbd/Q==",
+        "requested": "[108.0.3, )",
+        "resolved": "108.0.3",
+        "contentHash": "OtL5CaGNA6sgBI4cTQMTLCcEtOqYJ0AuQG1ym1/oX5rRn4gJY3hdF89QLMjieCfEsxCrgqf29jJ3ydYuK8xTTA==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.1",
-          "RestSharp": "106.13.0"
+          "RestSharp": "108.0.3"
         }
       },
       "System.CommandLine": {
