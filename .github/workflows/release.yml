@@ -25,7 +25,7 @@ jobs:
     with:
       sln-file-name: Digitalroot.ModUploader
       proj-file-name: Digitalroot.ModUploader
-      skip-unit-tests: true
+      #skip-unit-tests: true
       nuget-gh-upload: true
       nuget-s3-upload: true
       nuget-org-upload: true
