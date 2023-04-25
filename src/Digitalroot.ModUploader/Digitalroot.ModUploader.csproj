@@ -18,11 +18,11 @@
     <PackageIcon>ValheimRcon_color.png</PackageIcon>
     <PackageIconUrl />
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>valheim, digitalroot, mods, cli, tool, nexusmods, thunderstore, modvault</PackageTags>
+    <PackageTags>valheim, digitalroot, mods, cli, tool, nexusmods, thunderstore</PackageTags>
     <Authors>Digitalroot</Authors>
     <Company>Digitalroot Technologies</Company>
     <Product>Digitalroot Mod Uploader</Product>
-    <Description>Uploads mods to Thunderstore, ModVault, or NexusMods</Description>
+    <Description>Uploads mods to NexusMods or Thunderstore</Description>
     <DebugType>embedded</DebugType>
     <PackageReleaseNotes>Initial Release, works for NexusMods only.</PackageReleaseNotes>
     <NeutralLanguage>en-US</NeutralLanguage>
