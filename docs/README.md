@@ -1,4 +1,4 @@
-# OdinPlus Mod Uploader
+# Digitalroot Mod Uploader
 
 ## Introduction
 
@@ -11,7 +11,7 @@ This is a command-line tool that can be used to upload mod files to an existing 
 You can either download the binary for your platform from the Releases section on the right, or install it using the `dotnet` CLI:
 
 ```bash
-dotnet tool install -g OdinPlusModUploader
+dotnet tool install -g DigitalrootModUploader
 # then run with
 opmu
 ```
@@ -32,13 +32,13 @@ All Commands support the `-?, -h, --help` options to show help and usage informa
 
 ### Commands:
 
-###### OdinPlusModUploader -h
+###### DigitalrootModUploader -h
 ```bat
 Description:
   Uploads mods to Thunderstore, ModVault, or NexusMods
 
 Usage:
-  OdinPlusModUploader [command] [options]
+  DigitalrootModUploader [command] [options]
 
 Options:
   --version       Show version information
@@ -51,13 +51,13 @@ Commands:
 ```
 ---
 
-###### OdinPlusModUploader nx -h
+###### DigitalrootModUploader nx -h
 ```bat
 Description:
   nexusmods.com commands.
 
 Usage:
-  OdinPlusModUploader nexusmods [command] [options]
+  DigitalrootModUploader nexusmods [command] [options]
 
 Options:
   -?, -h, --help  Show help and usage information
@@ -68,13 +68,13 @@ Commands:
 ```
 ---
 
-###### OdinPlusModUploader check -h
+###### DigitalrootModUploader check -h
 ```bat
 Description:
   Check that an API Key and Cookie are valid.
 
 Usage:
-  OdinPlusModUploader nexusmods check [options]
+  DigitalrootModUploader nexusmods check [options]
 
 Options:
   -k, --key <key>        Api Key, ENV: NEXUSMOD_API_KEY
@@ -84,13 +84,13 @@ Options:
 ```
 ---
 
-###### OdinPlusModUploader upload -h
+###### DigitalrootModUploader upload -h
 ```
 Description:
   Upload a file of 20.0GB or less to nexusmods.com
 
 Usage:
-  OdinPlusModUploader nexusmods upload [<mod-id> <archive-file>] [options]
+  DigitalrootModUploader nexusmods upload [<mod-id> <archive-file>] [options]
 
 Arguments:
   <mod-id>        Nexus mod id.
@@ -115,7 +115,7 @@ Options:
 
 #### Examples
 ```bash
-nexusmods check -k "7a0e--MyVeryLongNexusApiKey--377" -cnxid "%7B%22mechanism--MyVeryLongNexusSessionCookieValue--%22%7D" -csid "%7B%22mechanism--MyVeryLongNexusSessionCookieSessIdValue--%22%7D"
+nexusmods check -k "MyVeryLongNexusApiKey" -cnxid "%7B%22mechanism--MyVeryLongNexusSessionCookieValue--%22%7D" -csid "%7B%22mechanism--MyVeryLongNexusSessionCookieSessIdValue--%22%7D"
 ```
 ---
 ```bash
@@ -143,3 +143,8 @@ nexusmods upload 1303 "Digitalroot.Valheim.JVL.BT.Fix.v1.0.6.zip" -v "1.0.6" -f 
 > If your browser displays a cookie value starting with `{"mechanism` then you will need to html encode the value before using this tool.
 
  
+<br />
+<p align="center">
+<b>Digitalroot can be found in the Valhalla Legends Discord</b><br /><br />
+  <a href="https://discord.gg/SsMW3rm67u" target="_blank"><img src="https://digitalroot.net/img/vl/vl_logo_125x154.png"></a>
+</p>

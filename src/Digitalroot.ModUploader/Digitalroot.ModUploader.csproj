@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Digitalroot.ModUploader</PackageId>
+    <TargetFramework>net6.0</TargetFramework>
+    <Title>Digitalroot Mod Uploader</Title>
+    <RootNamespace>Digitalroot.ModUploader</RootNamespace>
+    <StartupObject>Digitalroot.ModUploader.Program</StartupObject>
+    <OutputType>Exe</OutputType>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>opmu</ToolCommandName>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright © Digitalroot Technologies 2021 - 2023</Copyright>
+    <PackageProjectUrl>https://github.com/Digitalroot-Valheim/Digitalroot.ModUploader</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Digitalroot-Valheim/Digitalroot.ModUploader</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>ValheimRcon_color.png</PackageIcon>
+    <PackageIconUrl />
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>valheim, digitalroot, mods, cli, tool, nexusmods, thunderstore, modvault</PackageTags>
+    <Authors>Digitalroot</Authors>
+    <Company>Digitalroot Technologies</Company>
+    <Product>Digitalroot Mod Uploader</Product>
+    <Description>Uploads mods to Thunderstore, ModVault, or NexusMods</Description>
+    <DebugType>embedded</DebugType>
+    <PackageReleaseNotes>Initial Release, works for NexusMods only.</PackageReleaseNotes>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <VersionPrefix>1.2.0</VersionPrefix>
+    <RestoreAdditionalProjectSources>
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json;
+      https://digitalroot-valheim-nuget.s3.us-west-2.amazonaws.com/index.json
+    </RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <Deterministic>True</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <Deterministic>True</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\ico\ValheimRcon_color.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pastel" Version="4.0.2" />
+    <PackageReference Include="RestSharp" Version="108.0.3" />
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="108.0.3" />
+    <PackageReference Include="System.CommandLine" Version="[2.0.0-beta1.21568.1]" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Provider\ModVault\Enums\" />
+    <Folder Include="Provider\ModVault\Models\" />
+    <Folder Include="Provider\ModVault\Protocol\" />
+    <Folder Include="Provider\Thunderstore\Enums\" />
+    <Folder Include="Provider\Thunderstore\Models\" />
+    <Folder Include="Provider\Thunderstore\Protocol\" />
+  </ItemGroup>
+
+</Project>
