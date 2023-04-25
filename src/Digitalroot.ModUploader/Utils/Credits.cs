@@ -17,26 +17,27 @@ namespace Digitalroot.ModUploader.Utils
       Console.WriteLine($"\t{"Timothy Baldridge".Pastel(ColorOptions.WarningColor)} aka {"halgari".Pastel(ColorOptions.WarningColor)} ({"https://github.com/halgari".Pastel(ColorOptions.SuccessColor)}).".Pastel(ColorOptions.InfoColor));
       Console.WriteLine($"\t{"Digitalroot".Pastel(ColorOptions.WarningColor)} ({"https://github.com/Digitalroot".Pastel(ColorOptions.SuccessColor)}).".Pastel(ColorOptions.InfoColor));
       Console.WriteLine();
-      Console.WriteLine($"OdinPlus Mod Uploader created by {"Digitalroot".Pastel(ColorOptions.WarningColor)} of the {"OdinPlus Team.".Pastel(ColorOptions.WarningColor)}".Pastel(ColorOptions.InfoColor));
+      Console.WriteLine($"Mod Uploader created by {"Digitalroot".Pastel(ColorOptions.WarningColor)} of the {"Valhalla Legends Team.".Pastel(ColorOptions.WarningColor)}".Pastel(ColorOptions.InfoColor));
       Console.WriteLine($"Released under the {"MIT License".Pastel(ColorOptions.WarningColor)}.".Pastel(ColorOptions.InfoColor));
       Console.WriteLine($"Support Me @ {"https://www.buymeacoffee.com/digitalroot".Pastel(ColorOptions.SuccessColor)}.".Pastel(ColorOptions.InfoColor));
-      Console.WriteLine($"Join us on Discord: {"https://discord.gg/mbkPcvu9ax".Pastel(ColorOptions.SuccessColor)}.".Pastel(ColorOptions.InfoColor));
+      Console.WriteLine($"Join us on Discord: {"https://discord.gg/SsMW3rm67u".Pastel(ColorOptions.SuccessColor)}.".Pastel(ColorOptions.InfoColor));
     }
 
     internal static void PrintWelcome()
     {
       var appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-      Console.WriteLine($"OdinPlus Mod Uploader ({appVersion?.Major}.{appVersion?.Minor}.{appVersion?.Build})".Pastel(ColorOptions.InfoColor));
+      Console.WriteLine($"Mod Uploader ({appVersion?.Major}.{appVersion?.Minor}.{appVersion?.Build})".Pastel(ColorOptions.InfoColor));
       Console.WriteLine($"By: {"Digitalroot".Pastel(ColorOptions.WarningColor)}".Pastel(ColorOptions.InfoColor));
       Console.WriteLine();
     }
 
     internal static void PrintBanner()
     {
-      Console.WriteLine(@"   ___     _ _      ___ _           _____               ".Pastel(ColorOptions.StatusColor));
-      Console.WriteLine(@"  / _ \ __| (_)_ _ | _ \ |_  _ ___ |_   _|__ __ _ _ __  ".Pastel(ColorOptions.StatusColor));
-      Console.WriteLine(@" | (_) / _` | | ' \|  _/ | || (_-<   | |/ -_) _` | '  \ ".Pastel(ColorOptions.StatusColor));
-      Console.WriteLine(@"  \___/\__,_|_|_||_|_| |_|\_,_/__/   |_|\___\__,_|_|_|_|".Pastel(ColorOptions.StatusColor));
+      Console.WriteLine(@"  ___  _      _ _        _              _   ".Pastel(ColorOptions.StatusColor));
+      Console.WriteLine(@" |   \(_)__ _(_) |_ __ _| |_ _ ___  ___| |_ ".Pastel(ColorOptions.StatusColor));
+      Console.WriteLine(@" | |) | / _` | |  _/ _` | | '_/ _ \/ _ \  _|".Pastel(ColorOptions.StatusColor));
+      Console.WriteLine(@" |___/|_\__, |_|\__\__,_|_|_| \___/\___/\__|".Pastel(ColorOptions.StatusColor));
+      Console.WriteLine(@"        |___/                               ".Pastel(ColorOptions.StatusColor));
       Console.WriteLine();
     }
   }

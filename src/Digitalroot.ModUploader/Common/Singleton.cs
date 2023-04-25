@@ -6,7 +6,6 @@ namespace Digitalroot.ModUploader.Common;
 
 /// <summary>
 /// Source: https://github.com/Digitalroot/digitalroot-valheim-mods/blob/main/Digitalroot.Valheim.Common/Core/Singleton.cs
-/// Permission granted to OdinPlus under 
 /// License: "GNU Affero General Public License v3.0"
 /// License ref: https://github.com/Digitalroot/digitalroot-valheim-mods/blob/main/LICENSE
 /// </summary>

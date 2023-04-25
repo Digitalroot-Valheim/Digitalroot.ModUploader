@@ -4,7 +4,7 @@ using System;
 
 namespace Digitalroot.ModUploader.Configuration;
 
-public static class OdinPlusModUploaderClientConfigurationFactory
+public static class ModUploaderClientConfigurationFactory
 {
   public static AbstractHostProviderConfiguration CreateInstance(ModHostProvider modHostProvider)
   {

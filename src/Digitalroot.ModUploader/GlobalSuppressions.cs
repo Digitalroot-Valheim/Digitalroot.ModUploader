@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Conflict with Resharper", Scope = "type", Target = "~T:OdinPlusModUploader.Provider.NexusMods.Commands.UploadCommand")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Conflict with Resharper", Scope = "type", Target = "~T:ModUploader.Provider.NexusMods.Commands.UploadCommand")]

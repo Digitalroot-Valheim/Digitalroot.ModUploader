@@ -4,16 +4,16 @@
 
 This is a command-line tool that can be used to upload mod files to an existing mod on Thunderstore, ModVault and Nexus Mods.
 
-**Note:** _Thunderstore and ModVault support will be in a future release._
+**Note:** _Thunderstore support will be in a future release._
 
 ## Installation
 
 You can either download the binary for your platform from the Releases section on the right, or install it using the `dotnet` CLI:
 
 ```bash
-dotnet tool install -g DigitalrootModUploader
+dotnet tool install -g Digitalroot.ModUploader
 # then run with
-opmu
+drmu
 ```
 
 ## Configuration and Usage
@@ -32,13 +32,13 @@ All Commands support the `-?, -h, --help` options to show help and usage informa
 
 ### Commands:
 
-###### DigitalrootModUploader -h
+###### Digitalroot.ModUploader.exe -h
 ```bat
 Description:
   Uploads mods to Thunderstore, ModVault, or NexusMods
 
 Usage:
-  DigitalrootModUploader [command] [options]
+  Digitalroot.ModUploader.exe [command] [options]
 
 Options:
   --version       Show version information
@@ -51,13 +51,13 @@ Commands:
 ```
 ---
 
-###### DigitalrootModUploader nx -h
+###### Digitalroot.ModUploader.exe nx -h
 ```bat
 Description:
   nexusmods.com commands.
 
 Usage:
-  DigitalrootModUploader nexusmods [command] [options]
+  Digitalroot.ModUploader.exe nexusmods [command] [options]
 
 Options:
   -?, -h, --help  Show help and usage information
@@ -68,13 +68,13 @@ Commands:
 ```
 ---
 
-###### DigitalrootModUploader check -h
+###### Digitalroot.ModUploader.exe check -h
 ```bat
 Description:
   Check that an API Key and Cookie are valid.
 
 Usage:
-  DigitalrootModUploader nexusmods check [options]
+  Digitalroot.ModUploader.exe nexusmods check [options]
 
 Options:
   -k, --key <key>        Api Key, ENV: NEXUSMOD_API_KEY
@@ -84,13 +84,13 @@ Options:
 ```
 ---
 
-###### DigitalrootModUploader upload -h
+###### Digitalroot.ModUploader.exe upload -h
 ```
 Description:
   Upload a file of 20.0GB or less to nexusmods.com
 
 Usage:
-  DigitalrootModUploader nexusmods upload [<mod-id> <archive-file>] [options]
+  Digitalroot.ModUploader.exe nexusmods upload [<mod-id> <archive-file>] [options]
 
 Arguments:
   <mod-id>        Nexus mod id.
