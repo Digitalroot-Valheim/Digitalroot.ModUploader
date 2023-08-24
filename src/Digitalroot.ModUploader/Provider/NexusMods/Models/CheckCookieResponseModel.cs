@@ -11,6 +11,6 @@ internal class CheckCookieResponseModel : AbstractResponseModel
 
   public CheckCookieResponseModel(CheckCookieResponse checkCookieResponse)
   {
-    IsCookieValid = checkCookieResponse.IsSuccessful && !checkCookieResponse.Content.Contains("og:") && !checkCookieResponse.Content.Contains("Error");
+    IsCookieValid = checkCookieResponse.IsSuccessful && !checkCookieResponse.Content.Contains("You are not allowed to access this area!") && !checkCookieResponse.Content.Contains("Error</h3>");
   }
 }

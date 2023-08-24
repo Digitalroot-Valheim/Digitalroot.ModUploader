@@ -162,7 +162,6 @@ namespace Digitalroot.ModUploader.Clients
 
       if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
       {
-        restClient.AddCookie("nexusid", model.CookieNexusId, "/", ".nexusmods.com");
         restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
       }
 
@@ -178,7 +177,6 @@ namespace Digitalroot.ModUploader.Clients
 
       if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
       {
-        restClient.AddCookie("nexusid", model.CookieNexusId, "/", ".nexusmods.com");
         restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
       }
 
@@ -199,7 +197,6 @@ namespace Digitalroot.ModUploader.Clients
 
       if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
       {
-        restClient.AddCookie("nexusid", model.CookieNexusId, "/", ".nexusmods.com");
         restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
       }
 

@@ -29,6 +29,8 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Commands;
 internal static class UploadCommand
 {
   private static readonly AutoResetEvent _autoEvent = new(false);
+  // ReSharper disable once RedundantDefaultMemberInitializer
+  // ReSharper disable once IdentifierTypo
   private static bool _isErrored = false;
 
   internal static ICommand GetUploadCommand()
@@ -48,7 +50,6 @@ internal static class UploadCommand
       , CommandHelper.GetOption(new[] { "--disable-main-vortex", "-dmv" }, "Skips setting file as the main Vortex file.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-requirements-pop-up", "-drpu" }, "Skips informing downloaders of this mod's requirements before they attempt to download this file", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
-      , CommandHelper.GetOption(new[] { "--cookie_nexusid", "-cnxid" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE_NEXUSID".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE_NEXUSID"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--cookie_sid_develop", "-csid" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE_SID_DEVELOP".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE_SID_DEVELOP"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
     };
 
@@ -73,7 +74,6 @@ internal static class UploadCommand
       , bool         // disableMainVortex
       , bool         // enableRequirementsPopUp
       , string       // key
-      , string       // cookie_nexusid
       , string       // cookie_sid_develop
     >(
       async (modId                        // uint? - Arg
@@ -89,7 +89,6 @@ internal static class UploadCommand
              , disableMainVortex          // bool
              , disableRequirementsPopUp   // bool
              , key                        // string
-             , cookie_nexusid             // string
              , cookie_sid_develop         // string
       ) =>
       {
@@ -121,7 +120,7 @@ internal static class UploadCommand
         var totalChunks = GetChunkCount(archiveFile);
 
         // Upload all chunks but the last one. 
-        var r = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
+        var _ = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
         RunUploadWorkFlow(totalChunks); // Upload the last file chunk
         _autoEvent.WaitOne();
 
@@ -139,7 +138,6 @@ internal static class UploadCommand
             var uploadFileChunk = await GetUploadWorkflow(i
                                                           , totalChunks
                                                           , archiveFile
-                                                          , cookie_nexusid
                                                           , cookie_sid_develop
                                                           , modId
                                                           , fileName
@@ -181,7 +179,7 @@ internal static class UploadCommand
               CheckFileStatusRequestModel,
               CheckFileStatusResponse,
               CheckFileStatusResponseModel
-            > checkFileStatus = await CheckFileStatus(cookie_nexusid, cookie_sid_develop, uploadFileChunk.ResponseModel);
+            > checkFileStatus = await CheckFileStatus(cookie_sid_develop, uploadFileChunk.ResponseModel);
 
             // Attach file to Mod.
             if (checkFileStatus.Response.IsSuccessful && checkFileStatus.ResponseModel.FileChunksReassembled)
@@ -194,8 +192,7 @@ internal static class UploadCommand
                 AddFileToModRequestModel,
                 AddFileToModResponse,
                 AddFileToModResponseModel
-              > addFileToMod = await AddFileToMod(cookie_nexusid
-                                                  , cookie_sid_develop
+              > addFileToMod = await AddFileToMod(cookie_sid_develop
                                                   , modId
                                                   , version
                                                   , disableVersionUpdate
@@ -240,6 +237,7 @@ internal static class UploadCommand
 
   #region Workflow
 
+  [SuppressMessage("ReSharper", "UnusedParameter.Local")]
   private static async Task<Message<
     UploadFileChunkRequest,
     UploadFileChunkRequestModel,
@@ -248,7 +246,6 @@ internal static class UploadCommand
   >> GetUploadWorkflow(int i
                        , int totalChunks
                        , FileInfo archiveFile
-                       , string cookieNexusId
                        , string cookiesid_develop
                        , uint modId
                        , string fileName
@@ -257,6 +254,7 @@ internal static class UploadCommand
                        , bool disableDownloadWithManager
                        , bool disableVersionUpdate
                        , bool disableMainVortex
+                       #pragma warning disable IDE0060
                        , CategoryName categoryName
                        , string description
                        , Message<GameInfoRequest, GameInfoRequestModel, GameInfoResponse, GameInfoResponseModel> gameInfoMessage
@@ -264,7 +262,9 @@ internal static class UploadCommand
                        , bool disableMainFileUpdate
                        , int oldFileId
                        , bool newExisting
-                       , bool removeOldVersion)
+                       , bool removeOldVersion
+                       #pragma warning restore IDE0060
+    )
   {
     // Check if chunk already uploaded
     Message<
@@ -273,7 +273,6 @@ internal static class UploadCommand
       UploadChunkExistsResponse,
       UploadChunkExistsChunkResponseModel
     > checkUploadChunkExists = await CheckUploadChunkExists(archiveFile
-                                                            , cookieNexusId
                                                             , cookiesid_develop
                                                             , Convert.ToUInt32(i)
                                                             , i != totalChunks
@@ -331,7 +330,6 @@ internal static class UploadCommand
       UploadFileChunkResponseModel
     > uploadFileChunk = await UploadFileChunk(modId
                                               , archiveFile
-                                              , cookieNexusId
                                               , cookiesid_develop
                                               , fileName
                                               , version
@@ -352,7 +350,7 @@ internal static class UploadCommand
   /// <summary>
   /// Add an assembled file to a mod.
   /// </summary>
-  /// <param name="cookieNexusId"></param>
+  /// <param name="cookiesid_develop"></param>
   /// <param name="modId"></param>
   /// <param name="version"></param>
   /// <param name="disableVersionUpdate"></param>
@@ -377,8 +375,7 @@ internal static class UploadCommand
     , AddFileToModRequestModel
     , AddFileToModResponse
     , AddFileToModResponseModel
-  >> AddFileToMod(string cookieNexusId
-                  , string cookiesid_develop
+  >> AddFileToMod(string cookiesid_develop
                   , uint modId
                   , string version
                   , bool disableVersionUpdate
@@ -400,8 +397,7 @@ internal static class UploadCommand
     Console.WriteLine($"Adding uploaded file to mod {modId}".Pastel(ColorOptions.InfoColor));
 
     var message = new Message<AddFileToModRequest, AddFileToModRequestModel, AddFileToModResponse, AddFileToModResponseModel>();
-    message.RequestModel = new AddFileToModRequestModel(cookieNexusId
-                                                        , cookiesid_develop
+    message.RequestModel = new AddFileToModRequestModel(cookiesid_develop
                                                         , gameId
                                                         , fileName
                                                         , version
@@ -461,7 +457,6 @@ internal static class UploadCommand
   /// <summary>
   /// Check if chunks have already been assembled.
   /// </summary>
-  /// <param name="cookieNexusId"></param>
   /// <param name="cookiesid_develop"></param>
   /// <param name="uploadFileChunkResponseModel"></param>
   /// <returns></returns>
@@ -469,12 +464,12 @@ internal static class UploadCommand
   private static async Task<Message<
     CheckFileStatusRequest, CheckFileStatusRequestModel,
     CheckFileStatusResponse, CheckFileStatusResponseModel
-  >> CheckFileStatus(string cookieNexusId, string cookiesid_develop, UploadFileChunkResponseModel uploadFileChunkResponseModel)
+  >> CheckFileStatus(string cookiesid_develop, UploadFileChunkResponseModel uploadFileChunkResponseModel)
   {
     Console.WriteLine($"Validating file upload for '{uploadFileChunkResponseModel.Uuid}'".Pastel(ColorOptions.InfoColor));
 
     var message = new Message<CheckFileStatusRequest, CheckFileStatusRequestModel, CheckFileStatusResponse, CheckFileStatusResponseModel>();
-    message.RequestModel = new CheckFileStatusRequestModel(cookieNexusId, cookiesid_develop, uploadFileChunkResponseModel.Uuid, uploadFileChunkResponseModel.UploadFileHash);
+    message.RequestModel = new CheckFileStatusRequestModel(cookiesid_develop, uploadFileChunkResponseModel.Uuid, uploadFileChunkResponseModel.UploadFileHash);
     message.Request = new CheckFileStatusRequest(message.RequestModel);
 
     var attempt = 1;
@@ -499,7 +494,7 @@ internal static class UploadCommand
   /// Check if a chunk has already been uploaded.
   /// </summary>
   /// <param name="archiveFile"></param>
-  /// <param name="cookieNexusId"></param>
+  /// <param name="cookiesid_develop"></param>
   /// <param name="resumableChunkNumber"></param>
   /// <param name="resumableCurrentChunkSize"></param>
   /// <param name="resumableTotalChunks"></param>
@@ -509,7 +504,6 @@ internal static class UploadCommand
     UploadChunkExistsRequest, UploadChunkExistsRequestModel,
     UploadChunkExistsResponse, UploadChunkExistsChunkResponseModel
   >> CheckUploadChunkExists(FileInfo archiveFile
-                            , string cookieNexusId
                             , string cookiesid_develop
                             , uint resumableChunkNumber
                             , uint resumableCurrentChunkSize
@@ -520,8 +514,7 @@ internal static class UploadCommand
       UploadChunkExistsResponse, UploadChunkExistsChunkResponseModel
     >();
 
-    message.RequestModel = new UploadChunkExistsRequestModel(cookieNexusId
-                                                             , cookiesid_develop
+    message.RequestModel = new UploadChunkExistsRequestModel(cookiesid_develop
                                                              , archiveFile.Name
                                                              , archiveFile.Length
                                                              , resumableChunkNumber
@@ -627,7 +620,7 @@ internal static class UploadCommand
   /// </summary>
   /// <param name="modId"></param>
   /// <param name="archiveFile"></param>
-  /// <param name="cookieNexusId"></param>
+  /// <param name="cookiesid_develop"></param>
   /// <param name="fileName"></param>
   /// <param name="version"></param>
   /// <param name="game"></param>
@@ -643,7 +636,6 @@ internal static class UploadCommand
     UploadFileChunkResponse, UploadFileChunkResponseModel
   >> UploadFileChunk(uint modId
                      , FileInfo archiveFile
-                     , string cookieNexusId
                      , string cookiesid_develop
                      , string fileName
                      , string version
@@ -655,8 +647,7 @@ internal static class UploadCommand
                      , byte[] buffer)
   {
     var message = new Message<UploadFileChunkRequest, UploadFileChunkRequestModel, UploadFileChunkResponse, UploadFileChunkResponseModel>();
-    message.RequestModel = new UploadFileChunkRequestModel(cookieNexusId
-                                                           , cookiesid_develop
+    message.RequestModel = new UploadFileChunkRequestModel(cookiesid_develop
                                                            , modId
                                                            , archiveFile
                                                            , fileName

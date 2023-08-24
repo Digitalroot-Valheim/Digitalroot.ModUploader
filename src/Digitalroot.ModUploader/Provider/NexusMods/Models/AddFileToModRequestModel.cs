@@ -28,8 +28,7 @@ internal class AddFileToModRequestModel : CookieRequestModel
   public readonly bool RemoveNmmButton;  // 1 +
 
   /// <inheritdoc />
-  internal AddFileToModRequestModel(string cookieNexusId
-                                    , string cookiesid_develop
+  internal AddFileToModRequestModel(string cookiesid_develop
                                     , int gameId
                                     , string name
                                     , string fileVersion
@@ -49,7 +48,7 @@ internal class AddFileToModRequestModel : CookieRequestModel
                                     , bool removeNmmButton
                                     , bool newExisting
                                     , bool removeOldVersion)
-    : base(cookieNexusId, cookiesid_develop)
+    : base(cookiesid_develop)
   {
     GameId = gameId;                     //
     Name = name;                         //

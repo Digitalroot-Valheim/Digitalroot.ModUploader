@@ -24,12 +24,12 @@
     <Product>Digitalroot Mod Uploader</Product>
     <Description>Uploads mods to NexusMods or Thunderstore</Description>
     <DebugType>embedded</DebugType>
-    <PackageReleaseNotes>Initial Release, works for NexusMods only.</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated to match nx api.</PackageReleaseNotes>
     <NeutralLanguage>en-US</NeutralLanguage>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-    <VersionPrefix>1.2.0</VersionPrefix>
+    <VersionPrefix>1.3.0</VersionPrefix>
     <RestoreAdditionalProjectSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json;
       https://digitalroot-valheim-nuget.s3.us-west-2.amazonaws.com/index.json
