@@ -136,7 +136,7 @@ nexusmods upload 1303 "Digitalroot.Valheim.JVL.BT.Fix.v1.0.6.zip" -v "1.0.6" -f 
 
 ##### Q4: Where do I get my Nexus Mods' Session Cookies? 
 > From your browser. This [site](https://www.cookieyes.com/how-to-check-cookies-on-your-website-manually/) covers how to do it in most browers.
-> The cookies you are looking for are called `sid_develop`. It starts with `%7B%22mechanism`. This is the html encoded value for `{"mechanism`. 
+> The cookie you are looking for is called `sid_develop`. It starts with `%7B%22mechanism`. This is the html encoded value for `{"mechanism`. 
 > If your browser displays a cookie value starting with `{"mechanism` then you will need to html encode the value before using this tool.
 
  
