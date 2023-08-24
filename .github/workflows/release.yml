@@ -30,3 +30,4 @@ jobs:
       nuget-s3-upload: true
       nuget-org-upload: true
       is-nuget-package: true
+      force-assembly-version: true
