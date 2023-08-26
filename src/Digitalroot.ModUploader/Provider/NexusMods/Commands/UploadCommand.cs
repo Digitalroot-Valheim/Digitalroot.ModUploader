@@ -120,7 +120,13 @@ internal static class UploadCommand
         var totalChunks = GetChunkCount(archiveFile);
 
         // Upload all chunks but the last one. 
-        var _ = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
+        var r = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
+
+        while (!r.IsCompleted)
+        {
+          await Task.Delay(1000);
+        }
+        
         RunUploadWorkFlow(totalChunks); // Upload the last file chunk
         _autoEvent.WaitOne();
 
@@ -167,6 +173,7 @@ internal static class UploadCommand
               Console.WriteLine($"{nameof(uploadFileChunk.ResponseModel.UploadFileHash)}: {uploadFileChunk.ResponseModel.UploadFileHash}".Pastel(ColorOptions.ErrorColor));
               Console.WriteLine($"{nameof(uploadFileChunk.ResponseModel.Status)}: {uploadFileChunk.ResponseModel.Status}".Pastel(ColorOptions.ErrorColor));
               Console.WriteLine($"{nameof(uploadFileChunk.ResponseModel.Uuid)}: {uploadFileChunk.ResponseModel.Uuid}".Pastel(ColorOptions.ErrorColor));
+              return;
             }
             else
             {
