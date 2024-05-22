@@ -33,12 +33,12 @@ internal static class CheckCommand
 
   private static ICommandHandler GetCommandHandler()
   {
-    return CommandHandler.Create<string, string>(async (key, cnms) =>
+    return CommandHandler.Create<string, string>(async (key, nmsc) =>
                                                  {
                                                    var checkApiKeyMessage = await CheckApiKey(key);
                                                    Console.WriteLine(checkApiKeyMessage.Response.IsApiKeyValid ? "API key successfully validated!".Pastel(ColorOptions.SuccessColor) : "API key validation failed!".Pastel(ColorOptions.WarningColor));
 
-                                                   var checkCookieMessage = await CheckCookie(cnms);
+                                                   var checkCookieMessage = await CheckCookie(nmsc);
                                                    Console.WriteLine(checkCookieMessage.ResponseModel.IsCookieValid ? "Cookies successfully validated!".Pastel(ColorOptions.SuccessColor) : "Cookie validation failed!".Pastel(ColorOptions.WarningColor));
 
                                                    if (!(checkApiKeyMessage.Response.IsApiKeyValid && checkCookieMessage.ResponseModel.IsCookieValid))
