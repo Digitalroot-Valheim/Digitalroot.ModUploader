@@ -94,7 +94,7 @@ internal static class UploadCommand
              , disableMainVortex          // bool
              , disableRequirementsPopUp   // bool
              , key                        // string
-             , nexusmodsSessionCookie   // string
+             , nmsc                       // string
              ) =>
       {
         // Get Game Info
@@ -149,7 +149,7 @@ internal static class UploadCommand
             var uploadFileChunk = await GetUploadWorkflowAsync(i
                                                                , totalChunks
                                                                , archiveFile
-                                                               , nexusmodsSessionCookie
+                                                               , nmsc
                                                                , modId
                                                                , fileName
                                                                , version
@@ -183,7 +183,7 @@ internal static class UploadCommand
               CheckFileStatusRequestModel,
               CheckFileStatusResponse,
               CheckFileStatusResponseModel
-            > checkFileStatus = await CheckFileStatusAsync(nexusmodsSessionCookie
+            > checkFileStatus = await CheckFileStatusAsync(nmsc
                                                            , uploadFileChunk.ResponseModel);
 
             // Attach file to Mod.
@@ -197,7 +197,7 @@ internal static class UploadCommand
                 AddFileToModRequestModel,
                 AddFileToModResponse,
                 AddFileToModResponseModel
-              > addFileToMod = await AddFileToModAsync(nexusmodsSessionCookie
+              > addFileToMod = await AddFileToModAsync(nmsc
                                                        , modId
                                                        , version
                                                        , disableVersionUpdate
