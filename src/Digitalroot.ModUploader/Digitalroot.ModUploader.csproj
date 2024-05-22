@@ -29,7 +29,7 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-    <VersionPrefix>1.4.1</VersionPrefix>
+    <VersionPrefix>1.4.2</VersionPrefix>
     <RestoreAdditionalProjectSources>
       https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json;
       https://digitalroot-valheim-nuget.s3.us-west-2.amazonaws.com/index.json
