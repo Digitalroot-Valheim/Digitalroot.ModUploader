@@ -52,22 +52,11 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Validators
 
           break;
 
-        case "cookie_nexusmods_session":
-        case "cnms":
+        case "nexusmods_session_cookie":
+        case "nmsc":
           if ((optionResult.Tokens.Count != 1
                || string.IsNullOrEmpty(optionResult.Tokens[0].Value))
-              && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION")))
-          {
-            AddErrorMessage(optionResult, $"Error: --{optionResult.Symbol.Name} value is missing.");
-          }
-
-          break;
-
-        case "cookie_nexusmods_session_refresh":
-        case "cnmsr":
-          if ((optionResult.Tokens.Count != 1
-               || string.IsNullOrEmpty(optionResult.Tokens[0].Value))
-              && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION_REFRESH")))
+              && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_SESSION_COOKIE")))
           {
             AddErrorMessage(optionResult, $"Error: --{optionResult.Symbol.Name} value is missing.");
           }

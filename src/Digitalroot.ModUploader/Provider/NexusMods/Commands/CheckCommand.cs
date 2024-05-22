@@ -22,7 +22,7 @@ internal static class CheckCommand
     var command = new Command("check", "Check that an API Key and Cookie are valid.")
     {
       CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
-      , CommandHelper.GetOption(new[] { "--cookie_nexusmods_session", "-cnms" }, "Session Cookie, ENV: " + "COOKIE_NEXUSMOD_SESSION".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--nexusmods_session_cookie", "-nmsc" }, "Session Cookie, ENV: " + "NEXUSMOD_SESSION_COOKIE".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_SESSION_COOKIE"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
     };
 
     command.Handler = GetCommandHandler();
