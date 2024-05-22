@@ -23,7 +23,7 @@ Please use environment variables for the sensitive information.
 
 ### Environment Variables
 - __NEXUSMOD_API_KEY__ 
-- __COOKIE_NEXUSMOD_SESSION__
+- __NEXUSMOD_SESSION_COOKIE__
 
 All Commands support the `-?, -h, --help` options to show help and usage information
 
@@ -72,9 +72,9 @@ Usage:
   Digitalroot.ModUploader.exe nexusmods check [options]
 
 Options:
-  -k, --key <key>                     Api Key, ENV: NEXUSMOD_API_KEY
-  -cnms, --cookie_nexusmods_session   Session Cookie, ENV: COOKIE_NEXUSMOD_SESSION <cookie_nexusmods_session>
-  -?, -h, --help                      Show help and usage information
+  -k, --key <key>                                               Api Key, ENV: NEXUSMOD_API_KEY
+  -nmsc, --nexusmods_session_cookie <nexusmods_session_cookie_> Session Cookie, ENV: NEXUSMOD_SESSION_COOKIE
+  -?, -h, --help                                                Show help and usage information
 ```
 ---
 
@@ -103,13 +103,13 @@ Options:
   -dmv, --disable-main-vortex                                          Skips setting file as the main Vortex file. [default: False]
   -drpu, --disable-requirements-pop-up                                 Skips informing downloaders of this mod's requirements before they attempt to download this file [default: False]
   -k, --key <key>                                                      Api Key, ENV: NEXUSMOD_API_KEY
-  -cnms, --cookie_nexusmods_session <cookie_nexusmods_session>         Session Cookie, ENV: COOKIE_NEXUSMOD_SESSION
+  -nmsc, --nexusmods_session_cookie <nexusmods_session_cookie>         Session Cookie, ENV: NEXUSMOD_SESSION_COOKIE
   -?, -h, --help                                                       Show help and usage information
 ```
 
 #### Examples
 ```bash
-nexusmods check -k "MyVeryLongNexusApiKey" -cnms "6c1ae4818867700000XX804f1f55ae72"
+nexusmods check -k "MyVeryLongNexusApiKey" -nmsc "6c1ae4818867700000XX804f1f55ae72"
 ```
 ---
 ```bash

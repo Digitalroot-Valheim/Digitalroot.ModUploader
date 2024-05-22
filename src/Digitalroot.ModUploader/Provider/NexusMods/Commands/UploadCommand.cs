@@ -52,7 +52,7 @@ internal static class UploadCommand
       , CommandHelper.GetOption(new[] { "--disable-main-vortex", "-dmv" }, "Skips setting file as the main Vortex file.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-requirements-pop-up", "-drpu" }, "Skips informing downloaders of this mod's requirements before they attempt to download this file", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
-      , CommandHelper.GetOption(new[] { "--cookie_nexusmods_session", "-cnms" }, "Session Cookie, ENV: " + "COOKIE_NEXUSMOD_SESSION".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--nexusmods_session_cookie", "-nmsc" }, "Session Cookie, ENV: " + "NEXUSMOD_SESSION_COOKIE".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_SESSION_COOKIE"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
     };
 
     command.Handler = GetCommandHandler();
@@ -94,7 +94,7 @@ internal static class UploadCommand
              , disableMainVortex          // bool
              , disableRequirementsPopUp   // bool
              , key                        // string
-             , nexusmodsSession           // string
+             , nexusmodsSessionCookie   // string
              ) =>
       {
         // Get Game Info
@@ -149,7 +149,7 @@ internal static class UploadCommand
             var uploadFileChunk = await GetUploadWorkflowAsync(i
                                                                , totalChunks
                                                                , archiveFile
-                                                               , nexusmodsSession
+                                                               , nexusmodsSessionCookie
                                                                , modId
                                                                , fileName
                                                                , version
@@ -183,7 +183,7 @@ internal static class UploadCommand
               CheckFileStatusRequestModel,
               CheckFileStatusResponse,
               CheckFileStatusResponseModel
-            > checkFileStatus = await CheckFileStatusAsync(nexusmodsSession
+            > checkFileStatus = await CheckFileStatusAsync(nexusmodsSessionCookie
                                                            , uploadFileChunk.ResponseModel);
 
             // Attach file to Mod.
@@ -197,7 +197,7 @@ internal static class UploadCommand
                 AddFileToModRequestModel,
                 AddFileToModResponse,
                 AddFileToModResponseModel
-              > addFileToMod = await AddFileToModAsync(nexusmodsSession
+              > addFileToMod = await AddFileToModAsync(nexusmodsSessionCookie
                                                        , modId
                                                        , version
                                                        , disableVersionUpdate
