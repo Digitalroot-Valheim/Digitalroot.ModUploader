@@ -9,7 +9,6 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.Threading.Tasks;
 
 // ReSharper disable UseObjectOrCollectionInitializer
@@ -23,7 +22,7 @@ internal static class CheckCommand
     var command = new Command("check", "Check that an API Key and Cookie are valid.")
     {
       CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
-      , CommandHelper.GetOption(new[] { "--cookie_sid_develop", "-csid" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE_SID_DEVELOP".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE_SID_DEVELOP"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--cookie_nexusmods_session", "-cnms" }, "Session Cookie, ENV: " + "COOKIE_NEXUSMOD_SESSION".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
     };
 
     command.Handler = GetCommandHandler();
@@ -34,13 +33,19 @@ internal static class CheckCommand
 
   private static ICommandHandler GetCommandHandler()
   {
-    return CommandHandler.Create<string, string>(async (key, cookie_sid_develop) =>
+    return CommandHandler.Create<string, string>(async (key, cnms) =>
                                                  {
                                                    var checkApiKeyMessage = await CheckApiKey(key);
-                                                   Console.WriteLine(checkApiKeyMessage.Response.IsApiKeyValid ? "API key successfully validated!".Pastel(Color.Green) : "API key validation failed!".Pastel(Color.Orange));
+                                                   Console.WriteLine(checkApiKeyMessage.Response.IsApiKeyValid ? "API key successfully validated!".Pastel(ColorOptions.SuccessColor) : "API key validation failed!".Pastel(ColorOptions.WarningColor));
 
-                                                   var checkCookieMessage = await CheckCookie(cookie_sid_develop);
-                                                   Console.WriteLine(checkCookieMessage.ResponseModel.IsCookieValid ? "Cookies successfully validated!".Pastel(Color.Green) : "Cookie validation failed!".Pastel(Color.Orange));
+                                                   var checkCookieMessage = await CheckCookie(cnms);
+                                                   Console.WriteLine(checkCookieMessage.ResponseModel.IsCookieValid ? "Cookies successfully validated!".Pastel(ColorOptions.SuccessColor) : "Cookie validation failed!".Pastel(ColorOptions.WarningColor));
+
+                                                   if (!(checkApiKeyMessage.Response.IsApiKeyValid && checkCookieMessage.ResponseModel.IsCookieValid))
+                                                   {
+                                                     Console.WriteLine("Validation failed! Failing on error".Pastel(ColorOptions.ErrorColor));
+                                                     Environment.Exit(1);
+                                                   }
                                                  });
   }
 
@@ -62,10 +67,10 @@ internal static class CheckCommand
   private static async Task<Message<
     CheckCookieRequest, CookieRequestModel,
     CheckCookieResponse, CheckCookieResponseModel
-  >> CheckCookie(string cookieSidDevelop)
+  >> CheckCookie(string nexusmodsSession)
   {
     var message = new Message<CheckCookieRequest, CookieRequestModel, CheckCookieResponse, CheckCookieResponseModel>();
-    message.RequestModel = new CookieRequestModel(cookieSidDevelop);
+    message.RequestModel = new CookieRequestModel(nexusmodsSession);
     message.Request = new CheckCookieRequest(message.RequestModel);
     message.Response = await CommandUtils.RestClient.ExecuteAsync(message.Request);
     message.ResponseModel = new CheckCookieResponseModel(message.Response);

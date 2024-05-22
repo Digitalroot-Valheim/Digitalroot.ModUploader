@@ -18,9 +18,9 @@ namespace Digitalroot.ModUploader.Serialization
       _serializer = serializer;
     }
 
-    public string ContentType
+    public ContentType ContentType
     {
-      get => "application/json"; // Probably used for Serialization?
+      get => ContentType.Json; //"application/json"; // Probably used for Serialization?
       set { }
     }
 
@@ -57,8 +57,8 @@ namespace Digitalroot.ModUploader.Serialization
                                                             , ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                                                           });
 
-    public static JsonSerializerSettings DefaultSettings => new JsonSerializerSettings
-                                                         {
+    public static JsonSerializerSettings DefaultSettings => new()
+    {
                                                            NullValueHandling = NullValueHandling.Ignore
                                                            , MissingMemberHandling = MissingMemberHandling.Ignore
                                                            , Formatting = Formatting.Indented

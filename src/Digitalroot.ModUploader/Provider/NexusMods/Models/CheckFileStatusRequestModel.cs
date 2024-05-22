@@ -8,8 +8,10 @@ internal class CheckFileStatusRequestModel : CookieRequestModel
   internal string Uuid { get; }
   internal string FileHash { get; }
 
-  internal CheckFileStatusRequestModel(string cookiesid_develop, string uuid, string fileHash)
-    : base(cookiesid_develop)
+  internal CheckFileStatusRequestModel(string nexusmodsSession
+                                       , string uuid
+                                       , string fileHash)
+    : base(nexusmodsSession)
   {
     Uuid = uuid;
     FileHash = fileHash;

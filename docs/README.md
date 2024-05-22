@@ -2,9 +2,7 @@
 
 ## Introduction
 
-This is a command-line tool that can be used to upload mod files to an existing mod on Thunderstore, ModVault and Nexus Mods.
-
-**Note:** _Thunderstore support will be in a future release._
+This is a command-line tool that can be used to upload mod files to an existing mod on Nexus Mods.
 
 ## Installation
 
@@ -25,7 +23,7 @@ Please use environment variables for the sensitive information.
 
 ### Environment Variables
 - __NEXUSMOD_API_KEY__ 
-- __NEXUSMOD_COOKIE_SID_DEVELOP__
+- __COOKIE_NEXUSMOD_SESSION__
 
 All Commands support the `-?, -h, --help` options to show help and usage information
 
@@ -34,7 +32,7 @@ All Commands support the `-?, -h, --help` options to show help and usage informa
 ###### Digitalroot.ModUploader.exe -h
 ```bat
 Description:
-  Uploads mods to Thunderstore, ModVault, or NexusMods
+  Uploads mods to NexusMods
 
 Usage:
   Digitalroot.ModUploader.exe [command] [options]
@@ -44,9 +42,7 @@ Options:
   -?, -h, --help  Show help and usage information
 
 Commands:
-  modvault, mv      modvault.xyz commands.
   nexusmods, nx     nexusmods.com commands.
-  thunderstore, ts  thunderstore.io commands.
 ```
 ---
 
@@ -76,9 +72,9 @@ Usage:
   Digitalroot.ModUploader.exe nexusmods check [options]
 
 Options:
-  -k, --key <key>        Api Key, ENV: NEXUSMOD_API_KEY
-  -csid,  --cookie_sid_develop <cookie value>  Session Cookie, ENV: NEXUSMOD_COOKIE_SID_DEVELOP
-  -?, -h, --help         Show help and usage information
+  -k, --key <key>                     Api Key, ENV: NEXUSMOD_API_KEY
+  -cnms, --cookie_nexusmods_session   Session Cookie, ENV: COOKIE_NEXUSMOD_SESSION <cookie_nexusmods_session>
+  -?, -h, --help                      Show help and usage information
 ```
 ---
 
@@ -101,18 +97,19 @@ Options:
   -d, --description <description>                                      description
   -g, --game <game>                                                    Game mod is for. [default: valheim]
   -dmfu, --disable-main-file-update                                    Skips replacing an existing file in the 'Main' category with the new one. [default: False]
+  -dfa, --disable-file-archive                                         Skips archiving older versions of the existing file. [default: False]
   -ddwm, --disable-download-with-manager                               Removes the 'Download With Manager' button. [default: False]
   -dvu, --disable-version-update                                       Skips updating mod's main version to match this file's version. [default: False]
   -dmv, --disable-main-vortex                                          Skips setting file as the main Vortex file. [default: False]
   -drpu, --disable-requirements-pop-up                                 Skips informing downloaders of this mod's requirements before they attempt to download this file [default: False]
   -k, --key <key>                                                      Api Key, ENV: NEXUSMOD_API_KEY
-  -csid,  --cookie_sid_develop <cookie value>                          Session Cookie, ENV: NEXUSMOD_COOKIE_SID_DEVELOP
+  -cnms, --cookie_nexusmods_session <cookie_nexusmods_session>         Session Cookie, ENV: COOKIE_NEXUSMOD_SESSION
   -?, -h, --help                                                       Show help and usage information
 ```
 
 #### Examples
 ```bash
-nexusmods check -k "MyVeryLongNexusApiKey" -csid "%7B%22mechanism--MyVeryLongNexusSessionCookieSessIdValue--%22%7D"
+nexusmods check -k "MyVeryLongNexusApiKey" -cnms "6c1ae4818867700000XX804f1f55ae72"
 ```
 ---
 ```bash
@@ -136,8 +133,7 @@ nexusmods upload 1303 "Digitalroot.Valheim.JVL.BT.Fix.v1.0.6.zip" -v "1.0.6" -f 
 
 ##### Q4: Where do I get my Nexus Mods' Session Cookies? 
 > From your browser. This [site](https://www.cookieyes.com/how-to-check-cookies-on-your-website-manually/) covers how to do it in most browers.
-> The cookie you are looking for is called `sid_develop`. It starts with `%7B%22mechanism`. This is the html encoded value for `{"mechanism`. 
-> If your browser displays a cookie value starting with `{"mechanism` then you will need to html encode the value before using this tool.
+> The cookie you are looking for is called `nexusmods_session`. It is a hex value that looks like `6c1ae4818867700000XX804f1f55ae72`.
 
  
 <br />

@@ -1,19 +1,13 @@
 ﻿using Digitalroot.ModUploader.Models;
-using System;
 
 namespace Digitalroot.ModUploader.Provider.NexusMods.Models;
 
 internal class CookieRequestModel : AbstractRequestModel
 {
-  internal string CookieSidDevelop { get; }
+  internal string NexusmodsSession { get; }
 
-  internal CookieRequestModel(string cookieSidDevelop)
+  internal CookieRequestModel(string nexusmodsSession)
   {
-    CookieSidDevelop = cookieSidDevelop;
-  }
-
-  [Obsolete("Fix Me", true)]
-  internal CookieRequestModel(string cookieNexusId, string cookieSidDevelop)
-  {
+    NexusmodsSession = nexusmodsSession;
   }
 }

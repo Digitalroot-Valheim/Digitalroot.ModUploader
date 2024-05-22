@@ -4,7 +4,9 @@ using Digitalroot.ModUploader.Protocol;
 using Digitalroot.ModUploader.Provider.NexusMods.Configuration;
 using Digitalroot.ModUploader.Provider.NexusMods.Models;
 using Digitalroot.ModUploader.Provider.NexusMods.Protocol;
+using Newtonsoft.Json;
 using RestSharp;
+using RestSharp.Serializers.NewtonsoftJson;
 using System.Threading.Tasks;
 
 namespace Digitalroot.ModUploader.Provider.NexusMods.Clients
@@ -28,11 +30,18 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Clients
     public NexusModsRestClient(NexusModsHostProviderConfiguration modsHostProviderConfiguration)
       : base(modsHostProviderConfiguration)
     {
-      _modHostApiProviderClient = new RestClient(modsHostProviderConfiguration.ServiceApiUri);
-      SetNewtonsoftJsonSerializerAsHandler(_modHostApiProviderClient);
+      var apiOptions = new RestClientOptions(modsHostProviderConfiguration.ServiceApiUri);
+      var jsonSerializerSettings = new JsonSerializerSettings
+      {
+        MissingMemberHandling = MissingMemberHandling.Ignore
+        , NullValueHandling = NullValueHandling.Ignore
+      };
 
-      _modHostUploadProviderClient = new RestClient(modsHostProviderConfiguration.ServiceUploadUri);
-      SetNewtonsoftJsonSerializerAsHandler(_modHostUploadProviderClient);
+      _modHostApiProviderClient = new RestClient(apiOptions, configureSerialization: s => s.UseNewtonsoftJson(jsonSerializerSettings));
+
+      var uploadOptions = new RestClientOptions(modsHostProviderConfiguration.ServiceUploadUri);
+
+      _modHostUploadProviderClient = new RestClient(uploadOptions, configureSerialization: s => s.UseNewtonsoftJson(jsonSerializerSettings));
     }
 
     public static ErrorResponseModel GetErrorMessage(AbstractResponse response)

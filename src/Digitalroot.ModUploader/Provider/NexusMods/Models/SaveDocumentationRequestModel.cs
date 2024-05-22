@@ -12,7 +12,7 @@ internal class SaveDocumentationRequestModel : CookieRequestModel
   public readonly string Action;
   public readonly string ReadMeFile;
 
-  internal SaveDocumentationRequestModel(string cookiesid_develop
+  internal SaveDocumentationRequestModel(string nexusmodsSession
                                          , uint modId
                                          , uint gameId
                                          , string newVersion
@@ -20,7 +20,7 @@ internal class SaveDocumentationRequestModel : CookieRequestModel
                                          , int inputMethod = 0
                                          , string action = "save"
                                          , string readMeFile = "")
-    : base(cookiesid_develop)
+    : base(nexusmodsSession)
   {
     ModId = modId;
     GameId = gameId;

@@ -6,26 +6,26 @@ internal class UploadChunkExistsRequestModel : UploadFileMetaDataRequestModel
 {
   /// <inheritdoc />
   // ReSharper disable once MemberCanBePrivate.Global
-  internal UploadChunkExistsRequestModel(string cookiesid_develop
-                                        , string resumableFilename
-                                        , ulong resumableTotalSize
-                                        , uint resumableChunkNumber
-                                        , uint resumableCurrentChunkSize
-                                        , uint resumableTotalChunks)
-    : base(cookiesid_develop
+  internal UploadChunkExistsRequestModel(string nexusmodsSession
+                                         , string resumableFilename
+                                         , ulong resumableTotalSize
+                                         , uint resumableChunkNumber
+                                         , uint resumableCurrentChunkSize
+                                         , uint resumableTotalChunks)
+    : base(nexusmodsSession
            , resumableFilename
            , resumableTotalSize
            , resumableChunkNumber
            , resumableCurrentChunkSize
            , resumableTotalChunks) { }
 
-  internal UploadChunkExistsRequestModel(string cookieCookiesid
-                                        , string resumableFilename
-                                        , long resumableTotalSize
-                                        , uint resumableChunkNumber
-                                        , uint resumableCurrentChunkSize
-                                        , uint resumableTotalChunks)
-    : this(cookieCookiesid
+  internal UploadChunkExistsRequestModel(string nexusmodsSession
+                                         , string resumableFilename
+                                         , long resumableTotalSize
+                                         , uint resumableChunkNumber
+                                         , uint resumableCurrentChunkSize
+                                         , uint resumableTotalChunks)
+    : this(nexusmodsSession
            , resumableFilename
            , Convert.ToUInt64(resumableTotalSize)
            , resumableChunkNumber
