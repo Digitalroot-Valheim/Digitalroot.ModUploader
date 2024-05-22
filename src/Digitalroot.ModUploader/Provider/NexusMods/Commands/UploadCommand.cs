@@ -29,6 +29,7 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Commands;
 internal static class UploadCommand
 {
   private static readonly AutoResetEvent _autoEvent = new(false);
+
   // ReSharper disable once RedundantDefaultMemberInitializer
   // ReSharper disable once IdentifierTypo
   private static bool _isErrored = false;
@@ -45,12 +46,13 @@ internal static class UploadCommand
       , CommandHelper.GetOption<string>(new[] { "--description", "-d" }, "Description", null, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--game", "-g" }, "Game mod is for.", "valheim", optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-main-file-update", "-dmfu" }, "Skips replacing an existing file in the " + "'Main'".Pastel(ColorOptions.EmColor) + " category with the new one.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--disable-file-archive", "-dfa" }, "Skips archiving older versions of the existing file.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-download-with-manager", "-ddwm" }, "Removes the " + "'Download With Manager'".Pastel(ColorOptions.EmColor) + " button.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-version-update", "-dvu" }, "Skips updating mod's main version to match this file's version.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-main-vortex", "-dmv" }, "Skips setting file as the main Vortex file.", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--disable-requirements-pop-up", "-drpu" }, "Skips informing downloaders of this mod's requirements before they attempt to download this file", false, optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
       , CommandHelper.GetOption(new[] { "--key", "-k" }, "Api Key, ENV: " + "NEXUSMOD_API_KEY".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
-      , CommandHelper.GetOption(new[] { "--cookie_sid_develop", "-csid" }, "Session Cookie, ENV: " + "NEXUSMOD_COOKIE_SID_DEVELOP".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE_SID_DEVELOP"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
+      , CommandHelper.GetOption(new[] { "--cookie_nexusmods_session", "-cnms" }, "Session Cookie, ENV: " + "COOKIE_NEXUSMOD_SESSION".Pastel(ColorOptions.EmColor), CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION"), optionValidatorsFactory: ValidatorsFactory.Instance) as Option ?? throw new InvalidOperationException()
     };
 
     command.Handler = GetCommandHandler();
@@ -69,12 +71,14 @@ internal static class UploadCommand
       , string       // description
       , string       // game
       , bool         // disableMainFileUpdate
+      , bool         // disableFileArchive
       , bool         // disableDownloadWithManager
       , bool         // disableVersionUpdate
       , bool         // disableMainVortex
       , bool         // enableRequirementsPopUp
       , string       // key
-      , string       // cookie_sid_develop
+      , string       // nexusmodsSession
+
     >(
       async (modId                        // uint? - Arg
              , archiveFile                // FileInfo - Arg
@@ -84,16 +88,17 @@ internal static class UploadCommand
              , description                // string
              , game                       // string
              , disableMainFileUpdate      // bool
+             , disableFileArchive         // bool
              , disableDownloadWithManager // bool
              , disableVersionUpdate       // bool
              , disableMainVortex          // bool
              , disableRequirementsPopUp   // bool
              , key                        // string
-             , cookie_sid_develop         // string
-      ) =>
+             , nexusmodsSession           // string
+             ) =>
       {
         // Get Game Info
-        var gameInfoMessage = await GameInfo(key, game);
+        var gameInfoMessage = await GameInfoAsync(key, game);
         Console.WriteLine($"Preparing to upload '{archiveFile.Name}' ({FileSizeFormatter.FormatSize(archiveFile.Length)}) as version {version} to Nexus Mods upload Api.".Pastel(ColorOptions.InfoColor));
 
         // Replace Existing file
@@ -103,7 +108,7 @@ internal static class UploadCommand
           if (category == CategoryName.Main)
           {
             // Get mods current files
-            var modFileInfoMessage = await ModFilesInfo(key, game, modId);
+            var modFileInfoMessage = await GetModFilesInfoAsync(key, game, modId);
 
             if (!modFileInfoMessage.Response.IsSuccessful) return;
             var lastUpload = modFileInfoMessage.ResponseModel.Files.FirstOrDefault(fileInfo => fileInfo.CategoryId == Convert.ToUInt32(CategoryName.Main));
@@ -120,14 +125,14 @@ internal static class UploadCommand
         var totalChunks = GetChunkCount(archiveFile);
 
         // Upload all chunks but the last one. 
-        var r = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlow);
+        var r = Parallel.For(1, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = 2 }, RunUploadWorkFlowAsync);
 
         while (!r.IsCompleted)
         {
           await Task.Delay(1000);
         }
-        
-        RunUploadWorkFlow(totalChunks); // Upload the last file chunk
+
+        RunUploadWorkFlowAsync(totalChunks); // Upload the last file chunk
         _autoEvent.WaitOne();
 
         if (_isErrored)
@@ -137,30 +142,22 @@ internal static class UploadCommand
 
         #region Run Workflow
 
-        async void RunUploadWorkFlow(int i)
+        async void RunUploadWorkFlowAsync(int i)
         {
           try
           {
-            var uploadFileChunk = await GetUploadWorkflow(i
-                                                          , totalChunks
-                                                          , archiveFile
-                                                          , cookie_sid_develop
-                                                          , modId
-                                                          , fileName
-                                                          , version
-                                                          , game
-                                                          , disableDownloadWithManager
-                                                          , disableVersionUpdate
-                                                          , disableMainVortex
-                                                          , category
-                                                          , description
-                                                          , gameInfoMessage
-                                                          , disableRequirementsPopUp
-                                                          , disableMainFileUpdate
-                                                          , oldFileId
-                                                          , !disableMainFileUpdate
-                                                          , !disableMainFileUpdate
-                                                         );
+            var uploadFileChunk = await GetUploadWorkflowAsync(i
+                                                               , totalChunks
+                                                               , archiveFile
+                                                               , nexusmodsSession
+                                                               , modId
+                                                               , fileName
+                                                               , version
+                                                               , game
+                                                               , disableDownloadWithManager
+                                                               , disableVersionUpdate
+                                                               , disableMainVortex
+                                                              );
             if (uploadFileChunk == null) return;
             // if (uploadFileChunk.RequestModel.ResumableChunkNumber != totalChunks) return;
 
@@ -186,7 +183,8 @@ internal static class UploadCommand
               CheckFileStatusRequestModel,
               CheckFileStatusResponse,
               CheckFileStatusResponseModel
-            > checkFileStatus = await CheckFileStatus(cookie_sid_develop, uploadFileChunk.ResponseModel);
+            > checkFileStatus = await CheckFileStatusAsync(nexusmodsSession
+                                                           , uploadFileChunk.ResponseModel);
 
             // Attach file to Mod.
             if (checkFileStatus.Response.IsSuccessful && checkFileStatus.ResponseModel.FileChunksReassembled)
@@ -199,25 +197,25 @@ internal static class UploadCommand
                 AddFileToModRequestModel,
                 AddFileToModResponse,
                 AddFileToModResponseModel
-              > addFileToMod = await AddFileToMod(cookie_sid_develop
-                                                  , modId
-                                                  , version
-                                                  , disableVersionUpdate
-                                                  , disableMainVortex
-                                                  , fileName
-                                                  , archiveFile
-                                                  , category
-                                                  , description
-                                                  , disableDownloadWithManager
-                                                  , disableRequirementsPopUp
-                                                  , gameInfoMessage.ResponseModel.Id
-                                                  , checkFileStatus.RequestModel.Uuid
-                                                  , checkFileStatus.RequestModel.FileHash
-                                                  , disableMainFileUpdate
-                                                  , oldFileId
-                                                  , !disableMainFileUpdate
-                                                  , !disableMainFileUpdate
-                                                 );
+              > addFileToMod = await AddFileToModAsync(nexusmodsSession
+                                                       , modId
+                                                       , version
+                                                       , disableVersionUpdate
+                                                       , disableMainVortex
+                                                       , fileName
+                                                       , archiveFile
+                                                       , category
+                                                       , description
+                                                       , disableDownloadWithManager
+                                                       , disableRequirementsPopUp
+                                                       , gameInfoMessage.ResponseModel.Id
+                                                       , checkFileStatus.RequestModel.Uuid
+                                                       , checkFileStatus.RequestModel.FileHash
+                                                       , disableMainFileUpdate
+                                                       , oldFileId
+                                                       , !disableMainFileUpdate
+                                                       , !disableFileArchive
+                                                      );
 
               if (addFileToMod.Response.IsSuccessful)
               {
@@ -244,34 +242,23 @@ internal static class UploadCommand
 
   #region Workflow
 
-  [SuppressMessage("ReSharper", "UnusedParameter.Local")]
   private static async Task<Message<
     UploadFileChunkRequest,
     UploadFileChunkRequestModel,
     UploadFileChunkResponse,
     UploadFileChunkResponseModel
-  >> GetUploadWorkflow(int i
-                       , int totalChunks
-                       , FileInfo archiveFile
-                       , string cookiesid_develop
-                       , uint modId
-                       , string fileName
-                       , string version
-                       , string game
-                       , bool disableDownloadWithManager
-                       , bool disableVersionUpdate
-                       , bool disableMainVortex
-                       #pragma warning disable IDE0060
-                       , CategoryName categoryName
-                       , string description
-                       , Message<GameInfoRequest, GameInfoRequestModel, GameInfoResponse, GameInfoResponseModel> gameInfoMessage
-                       , bool disableRequirementsPopUp
-                       , bool disableMainFileUpdate
-                       , int oldFileId
-                       , bool newExisting
-                       , bool removeOldVersion
-                       #pragma warning restore IDE0060
-    )
+  >> GetUploadWorkflowAsync(int i
+                            , int totalChunks
+                            , FileInfo archiveFile
+                            , string nexusmodsSession
+                            , uint modId
+                            , string fileName
+                            , string version
+                            , string game
+                            , bool disableDownloadWithManager
+                            , bool disableVersionUpdate
+                            , bool disableMainVortex
+  )
   {
     // Check if chunk already uploaded
     Message<
@@ -279,14 +266,14 @@ internal static class UploadCommand
       UploadChunkExistsRequestModel,
       UploadChunkExistsResponse,
       UploadChunkExistsChunkResponseModel
-    > checkUploadChunkExists = await CheckUploadChunkExists(archiveFile
-                                                            , cookiesid_develop
-                                                            , Convert.ToUInt32(i)
-                                                            , i != totalChunks
-                                                                ? Convert.ToUInt32(NexusModsRestClient.ChunkSize)
-                                                                : Convert.ToUInt32(Convert.ToUInt64(archiveFile.Length) % NexusModsRestClient.ChunkSize)
-                                                            , Convert.ToUInt32(totalChunks)
-                                                           );
+    > checkUploadChunkExists = await CheckUploadChunkExistsAsync(archiveFile
+                                                                 , nexusmodsSession
+                                                                 , Convert.ToUInt32(i)
+                                                                 , i != totalChunks
+                                                                     ? Convert.ToUInt32(NexusModsRestClient.ChunkSize)
+                                                                     : Convert.ToUInt32(Convert.ToUInt64(archiveFile.Length) % NexusModsRestClient.ChunkSize)
+                                                                 , Convert.ToUInt32(totalChunks)
+                                                                );
 
     if (!checkUploadChunkExists.Response.IsSuccessful) return null;
 
@@ -335,17 +322,17 @@ internal static class UploadCommand
       UploadFileChunkRequestModel,
       UploadFileChunkResponse,
       UploadFileChunkResponseModel
-    > uploadFileChunk = await UploadFileChunk(modId
-                                              , archiveFile
-                                              , cookiesid_develop
-                                              , fileName
-                                              , version
-                                              , game
-                                              , disableDownloadWithManager
-                                              , disableVersionUpdate
-                                              , disableMainVortex
-                                              , checkUploadChunkExists.RequestModel
-                                              , buffer);
+    > uploadFileChunk = await UploadFileChunkAsync(modId
+                                                   , archiveFile
+                                                   , nexusmodsSession
+                                                   , fileName
+                                                   , version
+                                                   , game
+                                                   , disableDownloadWithManager
+                                                   , disableVersionUpdate
+                                                   , disableMainVortex
+                                                   , checkUploadChunkExists.RequestModel
+                                                   , buffer);
 
     return !uploadFileChunk.Response.IsSuccessful ? null : uploadFileChunk;
   }
@@ -357,7 +344,6 @@ internal static class UploadCommand
   /// <summary>
   /// Add an assembled file to a mod.
   /// </summary>
-  /// <param name="cookiesid_develop"></param>
   /// <param name="modId"></param>
   /// <param name="version"></param>
   /// <param name="disableVersionUpdate"></param>
@@ -375,6 +361,7 @@ internal static class UploadCommand
   /// <param name="oldFileId"></param>
   /// <param name="newExisting"></param>
   /// <param name="removeOldVersion"></param>
+  /// <param name="nexusmodsSession"></param>
   /// <returns></returns>
   [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
   private static async Task<Message<
@@ -382,29 +369,29 @@ internal static class UploadCommand
     , AddFileToModRequestModel
     , AddFileToModResponse
     , AddFileToModResponseModel
-  >> AddFileToMod(string cookiesid_develop
-                  , uint modId
-                  , string version
-                  , bool disableVersionUpdate
-                  , bool disableMainVortex
-                  , string fileName
-                  , FileInfo archiveFile
-                  , CategoryName categoryName
-                  , string description
-                  , bool disableDownloadWithManager
-                  , bool disableRequirementsPopUp
-                  , int gameId
-                  , string fileUuid
-                  , string uploadedFileHash
-                  , bool disableMainFileUpdate
-                  , int oldFileId
-                  , bool newExisting
-                  , bool removeOldVersion)
+  >> AddFileToModAsync(string nexusmodsSession
+                       , uint modId
+                       , string version
+                       , bool disableVersionUpdate
+                       , bool disableMainVortex
+                       , string fileName
+                       , FileInfo archiveFile
+                       , CategoryName categoryName
+                       , string description
+                       , bool disableDownloadWithManager
+                       , bool disableRequirementsPopUp
+                       , int gameId
+                       , string fileUuid
+                       , string uploadedFileHash
+                       , bool disableMainFileUpdate
+                       , int oldFileId
+                       , bool newExisting
+                       , bool removeOldVersion)
   {
     Console.WriteLine($"Adding uploaded file to mod {modId}".Pastel(ColorOptions.InfoColor));
 
     var message = new Message<AddFileToModRequest, AddFileToModRequestModel, AddFileToModResponse, AddFileToModResponseModel>();
-    message.RequestModel = new AddFileToModRequestModel(cookiesid_develop
+    message.RequestModel = new AddFileToModRequestModel(nexusmodsSession
                                                         , gameId
                                                         , fileName
                                                         , version
@@ -448,6 +435,7 @@ internal static class UploadCommand
         {
           Console.WriteLine($"Exception: {message.ErrorResponseModel.ErrorException}");
         }
+
         throw new Exception(message.ErrorResponseModel.ErrorMessage, message.ErrorResponseModel.ErrorException);
       }
       else
@@ -464,19 +452,20 @@ internal static class UploadCommand
   /// <summary>
   /// Check if chunks have already been assembled.
   /// </summary>
-  /// <param name="cookiesid_develop"></param>
   /// <param name="uploadFileChunkResponseModel"></param>
+  /// <param name="nexusmodsSession"></param>
   /// <returns></returns>
   [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
   private static async Task<Message<
     CheckFileStatusRequest, CheckFileStatusRequestModel,
     CheckFileStatusResponse, CheckFileStatusResponseModel
-  >> CheckFileStatus(string cookiesid_develop, UploadFileChunkResponseModel uploadFileChunkResponseModel)
+  >> CheckFileStatusAsync(string nexusmodsSession
+                          , UploadFileChunkResponseModel uploadFileChunkResponseModel)
   {
     Console.WriteLine($"Validating file upload for '{uploadFileChunkResponseModel.Uuid}'".Pastel(ColorOptions.InfoColor));
 
     var message = new Message<CheckFileStatusRequest, CheckFileStatusRequestModel, CheckFileStatusResponse, CheckFileStatusResponseModel>();
-    message.RequestModel = new CheckFileStatusRequestModel(cookiesid_develop, uploadFileChunkResponseModel.Uuid, uploadFileChunkResponseModel.UploadFileHash);
+    message.RequestModel = new CheckFileStatusRequestModel(nexusmodsSession, uploadFileChunkResponseModel.Uuid, uploadFileChunkResponseModel.UploadFileHash);
     message.Request = new CheckFileStatusRequest(message.RequestModel);
 
     var attempt = 1;
@@ -501,27 +490,27 @@ internal static class UploadCommand
   /// Check if a chunk has already been uploaded.
   /// </summary>
   /// <param name="archiveFile"></param>
-  /// <param name="cookiesid_develop"></param>
   /// <param name="resumableChunkNumber"></param>
   /// <param name="resumableCurrentChunkSize"></param>
   /// <param name="resumableTotalChunks"></param>
+  /// <param name="nexusmodsSession"></param>
   /// <returns></returns>
   [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
   private static async Task<Message<
     UploadChunkExistsRequest, UploadChunkExistsRequestModel,
     UploadChunkExistsResponse, UploadChunkExistsChunkResponseModel
-  >> CheckUploadChunkExists(FileInfo archiveFile
-                            , string cookiesid_develop
-                            , uint resumableChunkNumber
-                            , uint resumableCurrentChunkSize
-                            , uint resumableTotalChunks)
+  >> CheckUploadChunkExistsAsync(FileInfo archiveFile
+                                 , string nexusmodsSession
+                                 , uint resumableChunkNumber
+                                 , uint resumableCurrentChunkSize
+                                 , uint resumableTotalChunks)
   {
     var message = new Message<
       UploadChunkExistsRequest, UploadChunkExistsRequestModel,
       UploadChunkExistsResponse, UploadChunkExistsChunkResponseModel
     >();
 
-    message.RequestModel = new UploadChunkExistsRequestModel(cookiesid_develop
+    message.RequestModel = new UploadChunkExistsRequestModel(nexusmodsSession
                                                              , archiveFile.Name
                                                              , archiveFile.Length
                                                              , resumableChunkNumber
@@ -550,7 +539,7 @@ internal static class UploadCommand
   private static async Task<Message<
     GameInfoRequest, GameInfoRequestModel,
     GameInfoResponse, GameInfoResponseModel
-  >> GameInfo(string key, string game)
+  >> GameInfoAsync(string key, string game)
   {
     Console.WriteLine($"Attempting to retrieve game details for '{game}'".Pastel(ColorOptions.InfoColor));
     var message = new Message<GameInfoRequest, GameInfoRequestModel, GameInfoResponse, GameInfoResponseModel>();
@@ -588,7 +577,7 @@ internal static class UploadCommand
   private static async Task<Message<
     ModFilesInfoRequest, ModFilesInfoRequestModel,
     ModFilesInfoResponse, ModFilesInfoResponseModel
-  >> ModFilesInfo(string key, string game, uint modId)
+  >> GetModFilesInfoAsync(string key, string game, uint modId)
   {
     Console.WriteLine($"Attempting to retrieve mod file details for mod '{modId}' of '{game}'".Pastel(ColorOptions.InfoColor));
     var message = new Message<ModFilesInfoRequest, ModFilesInfoRequestModel, ModFilesInfoResponse, ModFilesInfoResponseModel>();
@@ -627,7 +616,6 @@ internal static class UploadCommand
   /// </summary>
   /// <param name="modId"></param>
   /// <param name="archiveFile"></param>
-  /// <param name="cookiesid_develop"></param>
   /// <param name="fileName"></param>
   /// <param name="version"></param>
   /// <param name="game"></param>
@@ -636,25 +624,26 @@ internal static class UploadCommand
   /// <param name="disableMainVortex"></param>
   /// <param name="uploadFileMetaDataRequestModel"></param>
   /// <param name="buffer"></param>
+  /// <param name="nexusmodsSession"></param>
   /// <returns></returns>
   [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "Consistent Pattern")]
   private static async Task<Message<
     UploadFileChunkRequest, UploadFileChunkRequestModel,
     UploadFileChunkResponse, UploadFileChunkResponseModel
-  >> UploadFileChunk(uint modId
-                     , FileInfo archiveFile
-                     , string cookiesid_develop
-                     , string fileName
-                     , string version
-                     , string game
-                     , bool disableDownloadWithManager
-                     , bool disableVersionUpdate
-                     , bool disableMainVortex
-                     , UploadFileMetaDataRequestModel uploadFileMetaDataRequestModel
-                     , byte[] buffer)
+  >> UploadFileChunkAsync(uint modId
+                          , FileInfo archiveFile
+                          , string nexusmodsSession
+                          , string fileName
+                          , string version
+                          , string game
+                          , bool disableDownloadWithManager
+                          , bool disableVersionUpdate
+                          , bool disableMainVortex
+                          , UploadFileMetaDataRequestModel uploadFileMetaDataRequestModel
+                          , byte[] buffer)
   {
     var message = new Message<UploadFileChunkRequest, UploadFileChunkRequestModel, UploadFileChunkResponse, UploadFileChunkResponseModel>();
-    message.RequestModel = new UploadFileChunkRequestModel(cookiesid_develop
+    message.RequestModel = new UploadFileChunkRequestModel(nexusmodsSession
                                                            , modId
                                                            , archiveFile
                                                            , fileName
@@ -718,11 +707,11 @@ internal static class UploadCommand
   {
     if (lastUpload == null)
     {
-      Console.WriteLine($"Unable to locate file to replace.".Pastel(ColorOptions.ErrorColor));
+      Console.WriteLine("Unable to locate file to replace.".Pastel(ColorOptions.ErrorColor));
       return;
     }
 
-    Console.WriteLine($"Last file uploaded info".Pastel(ColorOptions.WarningColor));
+    Console.WriteLine("Last file uploaded info".Pastel(ColorOptions.WarningColor));
     Console.WriteLine($"{lastUpload.Name}, ({lastUpload.ModVersion})".Pastel(ColorOptions.WarningColor));
     Console.WriteLine($"{lastUpload.FileName}, ({lastUpload.FileId})".Pastel(ColorOptions.WarningColor));
   }

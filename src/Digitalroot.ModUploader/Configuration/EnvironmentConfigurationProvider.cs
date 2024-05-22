@@ -10,7 +10,8 @@ internal class EnvironmentConfigurationProvider : IConfigs
   /// <inheritdoc />
   string IConfigs.GetConfig(string keyName)
   {
-    return Environment.GetEnvironmentVariable(keyName);
+    var value = Environment.GetEnvironmentVariable(keyName);
+    return value;
   }
 
   #endregion

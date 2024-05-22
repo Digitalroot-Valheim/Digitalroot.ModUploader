@@ -33,28 +33,19 @@ namespace Digitalroot.ModUploader.Clients
     private protected AbstractRestClient(AbstractHostProviderConfiguration modsHostProviderConfiguration)
     {
       _configuration = modsHostProviderConfiguration;
-      ModHostProviderClient = new RestClient(_configuration.ServiceUri);
-      SetNewtonsoftJsonSerializerAsHandler(ModHostProviderClient);
+      var options = new RestClientOptions(_configuration.ServiceUri);
+      var jsonSerializerSettings = new JsonSerializerSettings
+      {
+        MissingMemberHandling = MissingMemberHandling.Ignore
+        , NullValueHandling = NullValueHandling.Ignore
+      };
+
+      ModHostProviderClient = new RestClient(options, configureSerialization: s => s.UseNewtonsoftJson(jsonSerializerSettings));
     }
 
     #region Helper Methods
 
     internal string GetDefaultConfigValue(string value) => _configuration.GetDefaultConfigValue(value);
-
-    /// <summary>
-    /// Configures the client to use NewtonsoftJsonSerializer so that
-    /// The JsonProperty Attribute can be used.
-    /// e.g. [JsonProperty(PropertyName = "country")]
-    /// </summary>
-    /// <param name="restClient"></param>
-    private protected static void SetNewtonsoftJsonSerializerAsHandler(RestClient restClient)
-    {
-      restClient.UseNewtonsoftJson(new JsonSerializerSettings
-      {
-        MissingMemberHandling = MissingMemberHandling.Ignore
-        , NullValueHandling = NullValueHandling.Ignore
-      });
-    }
 
     internal static ErrorResponseModel GetErrorMessage(RestResponse response)
     {
@@ -75,7 +66,7 @@ namespace Digitalroot.ModUploader.Clients
     {
       Trace.WriteLine($"** Response ** - IsSuccessful: {response.IsSuccessful}, StatusCode: {response.StatusCode}");
       Trace.WriteLine("[Headers:]");
-      Trace.WriteLine(NewtonsoftJsonSerializer.Default.Serialize(response.Headers));
+      Trace.WriteLine(NewtonsoftJsonSerializer.Default.Serialize(response.Headers ?? throw new InvalidOperationException()));
       Trace.WriteLine(string.Empty);
 
       switch (response.ContentType)
@@ -91,7 +82,7 @@ namespace Digitalroot.ModUploader.Clients
 
         default:
           Trace.WriteLine("[Content]:");
-          Trace.WriteLine(NewtonsoftJsonSerializer.Default.Serialize(response.Content));
+          Trace.WriteLine(NewtonsoftJsonSerializer.Default.Serialize(response.Content ?? throw new InvalidOperationException()));
           break;
       }
 
@@ -127,14 +118,14 @@ namespace Digitalroot.ModUploader.Clients
 
     #region Obsolete
 
-    [Obsolete("Use Async Version")]
+    [Obsolete("Use Async Version", true)]
     protected static TRestResponse Get<TRestResponse>(RestClient restClient, RestRequest request)
     {
       var response = restClient.Get(request);
       return (TRestResponse)Activator.CreateInstance(typeof(TRestResponse), response);
     }
 
-    [Obsolete("Use Async Version")]
+    [Obsolete("Use Async Version", true)]
     protected static TRestResponse Get<TRestResponse, TRestResponseModel>(RestClient restClient, RestRequest request)
       where TRestResponse : AbstractResponse
     {
@@ -162,7 +153,8 @@ namespace Digitalroot.ModUploader.Clients
 
       if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
       {
-        restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
+        request.AddCookie("nexusmods_session", model.NexusmodsSession, "/", ".nexusmods.com");
+        // request.AddCookie("nexusmods_session_refresh", model.NexusmodsSessionRefresh, "/", ".nexusmods.com");
       }
 
       var response = await restClient.ExecuteGetAsync(request);
@@ -177,7 +169,8 @@ namespace Digitalroot.ModUploader.Clients
 
       if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
       {
-        restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
+        request.AddCookie("nexusmods_session", model.NexusmodsSession, "/", ".nexusmods.com");
+        // request.AddCookie("nexusmods_session_refresh", model.NexusmodsSessionRefresh, "/", ".nexusmods.com");
       }
 
       var response = await restClient.ExecuteGetAsync<TRestResponseModel>(request);
@@ -197,7 +190,8 @@ namespace Digitalroot.ModUploader.Clients
 
       if (request is AbstractAuthorizedRequest { Model: CookieRequestModel model })
       {
-        restClient.AddCookie("sid_develop", model.CookieSidDevelop, "/", ".nexusmods.com");  
+        request.AddCookie("nexusmods_session", model.NexusmodsSession, "/", ".nexusmods.com");
+        // request.AddCookie("nexusmods_session_refresh", model.NexusmodsSessionRefresh, "/", ".nexusmods.com");
       }
 
       var response = await restClient.ExecutePostAsync<TRestResponseModel>(request);

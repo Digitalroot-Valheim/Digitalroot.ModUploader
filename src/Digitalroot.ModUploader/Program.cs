@@ -21,18 +21,18 @@ namespace Digitalroot.ModUploader
       Credits.PrintWelcome();
 
       // Create a root command with some options
-      var rootCommand = new RootCommand("Uploads mods to Thunderstore, ModVault, or NexusMods")
+      var rootCommand = new RootCommand("Uploads mods to NexusMods")
       {
-        Provider.ModVault.Commands.GetRootCommand() ?? throw new InvalidOperationException()
-        , Provider.NexusMods.Commands.CommandFactory.GetCommand(Provider.NexusMods.Enums.CommandName.Root) as Command ?? throw new InvalidOperationException()
-        , Provider.Thunderstore.Commands.GetRootCommand() ?? throw new InvalidOperationException()
+        // Provider.ModVault.Commands.GetRootCommand() ?? throw new InvalidOperationException()
+        Provider.NexusMods.Commands.CommandFactory.GetCommand(Provider.NexusMods.Enums.CommandName.Root) as Command ?? throw new InvalidOperationException()
+        // , Provider.Thunderstore.Commands.GetRootCommand() ?? throw new InvalidOperationException()
       };
 
       var cmdBuilder = new CommandLineBuilder(rootCommand);
       cmdBuilder.AddMiddleware(async (context, next) =>
                                {
                                  // Trace Output of Command passed. Warning this outputs -k and -c values.
-                                 Trace.WriteLineIf(context?.ParseResult != null, context.ParseResult);
+                                 Trace.WriteLine(context.ParseResult);
                                  await next(context);
                                });
 
@@ -56,6 +56,10 @@ namespace Digitalroot.ModUploader
         Credits.PrintCredits();
       }
 
+      #if DEBUG
+      Console.ReadKey();
+      #endif
+
       return results;
     }
 
@@ -78,10 +82,9 @@ namespace Digitalroot.ModUploader
     }
 
     // ReSharper disable once UnusedMember.Local
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Not implemented yet")]
     private static MaskingHelpBuilder GetMaskingHelpBuilder(int maxWidth) => new(LocalizationResources.Instance, maxWidth);
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Not implemented yet")]
-    // ReSharper disable once UnusedMember.Local
     private static HelpBuilder GetUnMaskingHelpBuilder(int maxWidth) => new(LocalizationResources.Instance, maxWidth);
 
     private static void AddHelpSubCommandsRecursively(Command command)

@@ -32,10 +32,6 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Validators
 
     #endregion
 
-    #region Command
-
-    #endregion
-
     #region Option
 
     /// <inheritdoc />
@@ -46,6 +42,7 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Validators
       switch (optionResult.Symbol.Name)
       {
         case "key":
+        case "k":
           if ((optionResult.Tokens.Count != 1
                || string.IsNullOrEmpty(optionResult.Tokens[0].Value))
               && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_API_KEY")))
@@ -55,10 +52,22 @@ namespace Digitalroot.ModUploader.Provider.NexusMods.Validators
 
           break;
 
-        case "cookie":
+        case "cookie_nexusmods_session":
+        case "cnms":
           if ((optionResult.Tokens.Count != 1
                || string.IsNullOrEmpty(optionResult.Tokens[0].Value))
-              && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("NEXUSMOD_COOKIE")))
+              && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION")))
+          {
+            AddErrorMessage(optionResult, $"Error: --{optionResult.Symbol.Name} value is missing.");
+          }
+
+          break;
+
+        case "cookie_nexusmods_session_refresh":
+        case "cnmsr":
+          if ((optionResult.Tokens.Count != 1
+               || string.IsNullOrEmpty(optionResult.Tokens[0].Value))
+              && string.IsNullOrEmpty(CommandUtils.RestClient.GetDefaultConfigValue("COOKIE_NEXUSMOD_SESSION_REFRESH")))
           {
             AddErrorMessage(optionResult, $"Error: --{optionResult.Symbol.Name} value is missing.");
           }

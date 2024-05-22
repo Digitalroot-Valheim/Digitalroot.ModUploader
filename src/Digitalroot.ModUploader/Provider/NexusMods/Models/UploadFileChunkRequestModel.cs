@@ -19,7 +19,7 @@ internal class UploadFileChunkRequestModel : UploadFileMetaDataRequestModel
   public byte[] Buffer { get; }
 
   /// <inheritdoc />
-  internal UploadFileChunkRequestModel(string cookiesid_develop
+  internal UploadFileChunkRequestModel(string nexusmodsSession
                                        , uint modId
                                        , FileInfo archiveFile
                                        , string fileName
@@ -32,7 +32,7 @@ internal class UploadFileChunkRequestModel : UploadFileMetaDataRequestModel
                                        , uint resumableCurrentChunkSize
                                        , uint resumableTotalChunks
                                        , byte[] buffer)
-    : base(cookiesid_develop
+    : base(nexusmodsSession
            , archiveFile.Name
            , Convert.ToUInt64(archiveFile.Length)
            , resumableChunkNumber
