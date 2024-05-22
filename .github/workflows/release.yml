@@ -22,6 +22,8 @@ jobs:
       aws-access-key-id: ${{ secrets.NUGET_S3_REPO_KEY_ID }}
       aws-secret-access-key: ${{ secrets.NUGET_S3_REPO_KEY_SECRET }}
       nuget-org-key: ${{ secrets.NUGET_ORG_PAT }}
+      webhook_url: ${{ secrets.VALHEIM_DISCORD_TITANS_WEBHOOK_URL }}
+
     with:
       sln-file-name: Digitalroot.ModUploader
       proj-file-name: Digitalroot.ModUploader
